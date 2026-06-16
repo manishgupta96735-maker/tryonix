@@ -78,6 +78,12 @@ function TryOn() {
           )}
         </div>
 
+        {error && (
+          <p className="mt-4 text-center text-sm text-destructive">{error}</p>
+        )}
+
+
+
         {(loading || result) && (
           <div className="mt-12 max-w-2xl mx-auto fade-up">
             <h2 className="font-display text-2xl mb-4 text-center">Result</h2>
