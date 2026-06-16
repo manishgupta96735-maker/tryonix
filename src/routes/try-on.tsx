@@ -17,15 +17,27 @@ function TryOn() {
   const [clothImg, setClothImg] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const generate = async () => {
     if (!personImg || !clothImg) return;
     setLoading(true);
     setResult(null);
-    // Placeholder for AI try-on API call (Replicate / HuggingFace)
-    await new Promise(r => setTimeout(r, 2200));
-    setResult(personImg); // Demo: shows person image as placeholder result
-    setLoading(false);
+    setError(null);
+    try {
+      const res = await fetch("/api/tryon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personImage: personImg, clothImage: clothImg }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed");
+      setResult(data.image);
+    } catch (e: any) {
+      setError(e.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const reset = () => { setPersonImg(null); setClothImg(null); setResult(null); };
