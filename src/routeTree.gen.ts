@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TryOnRouteImport } from './routes/try-on'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiTryonRouteImport } from './routes/api/tryon'
 
 const TryOnRoute = TryOnRouteImport.update({
   id: '/try-on',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTryonRoute = ApiTryonRouteImport.update({
+  id: '/api/tryon',
+  path: '/api/tryon',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/try-on': typeof TryOnRoute
+  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/try-on': typeof TryOnRoute
+  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/try-on': typeof TryOnRoute
+  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/try-on'
+  fullPaths: '/' | '/try-on' | '/api/tryon'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/try-on'
-  id: '__root__' | '/' | '/try-on'
+  to: '/' | '/try-on' | '/api/tryon'
+  id: '__root__' | '/' | '/try-on' | '/api/tryon'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TryOnRoute: typeof TryOnRoute
+  ApiTryonRoute: typeof ApiTryonRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tryon': {
+      id: '/api/tryon'
+      path: '/api/tryon'
+      fullPath: '/api/tryon'
+      preLoaderRoute: typeof ApiTryonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TryOnRoute: TryOnRoute,
+  ApiTryonRoute: ApiTryonRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
