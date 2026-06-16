@@ -40,7 +40,7 @@ function TryOn() {
     }
   };
 
-  const reset = () => { setPersonImg(null); setClothImg(null); setResult(null); };
+  const reset = () => { setPersonImg(null); setClothImg(null); setResult(null); setError(null); };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
