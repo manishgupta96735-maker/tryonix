@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "TryOnix – See Clothes on Yourself Instantly" },
+      { name: "description", content: "Upload your photo and virtually try outfits instantly using AI." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "TryOnix – See Clothes on Yourself Instantly" },
+      { property: "og:description", content: "Upload your photo and virtually try outfits instantly using AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "TryOnix – See Clothes on Yourself Instantly" },
+      { name: "twitter:description", content: "Upload your photo and virtually try outfits instantly using AI." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
     ],
     links: [
       {
