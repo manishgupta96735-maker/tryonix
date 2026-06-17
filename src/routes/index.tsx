@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Zap, Smartphone } from "lucide-react";
-import mascot from "@/assets/mascot.png";
+import mascotAsset from "@/assets/mascot.png.asset.json";
+const mascot = mascotAsset.url;
 
 export const Route = createFileRoute("/")({
   head: () => ({
