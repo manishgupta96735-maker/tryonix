@@ -1,10 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Zap, Smartphone } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Smartphone, Loader2, Zap } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
+import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 const mascot = mascotAsset.url;
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "TryOnix — See Yourself in Any Outfit" },
@@ -19,6 +22,13 @@ type Screen = "onboard" | "language" | "welcome" | "features";
 function App() {
   const [screen, setScreen] = useState<Screen>("onboard");
   const [lang, setLang] = useState("en");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/app" });
+    });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex justify-center">
