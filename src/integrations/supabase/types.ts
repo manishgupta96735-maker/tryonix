@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id: string
+          name?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      tryon_history: {
+        Row: {
+          cloth_url: string | null
+          created_at: string
+          hd: boolean
+          id: string
+          person_url: string | null
+          result_url: string
+          user_id: string
+        }
+        Insert: {
+          cloth_url?: string | null
+          created_at?: string
+          hd?: boolean
+          id?: string
+          person_url?: string | null
+          result_url: string
+          user_id: string
+        }
+        Update: {
+          cloth_url?: string | null
+          created_at?: string
+          hd?: boolean
+          id?: string
+          person_url?: string | null
+          result_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_credits: {
+        Row: {
+          balance: number
+          is_pro: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          is_pro?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          is_pro?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
