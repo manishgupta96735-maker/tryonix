@@ -240,7 +240,7 @@ function Features() {
       </div>
 
       <div className="mt-4">
-        <Link to="/try-on" className="block">
+        <Link to="/app" className="block">
           <PrimaryButton>Get Started <ArrowRight className="size-4" /></PrimaryButton>
         </Link>
       </div>
