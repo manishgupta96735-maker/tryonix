@@ -9,11 +9,11 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
 });
 
-const PLANS = [
+const PLANS: Array<{ id: string; name: string; price: string; credits: string; features: string[]; cta: string; highlight?: boolean }> = [
   { id: "free", name: "Free", price: "$0", credits: "3 credits", features: ["Standard quality", "Try-on history"], cta: "Current" },
   { id: "pro", name: "Pro", price: "$9", credits: "100 credits/mo", features: ["HD 2048px downloads", "Priority queue", "All Free features"], cta: "Upgrade", highlight: true },
   { id: "scale", name: "Scale", price: "$29", credits: "500 credits/mo", features: ["Everything in Pro", "API access (soon)", "Shopify import (soon)"], cta: "Upgrade" },
-] as const;
+];
 
 function SettingsPage() {
   const [credits, setCredits] = useState(0);
