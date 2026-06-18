@@ -1,10 +1,13 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Zap, Smartphone } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Smartphone, Loader2, Zap } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
+import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 const mascot = mascotAsset.url;
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "TryOnix — See Yourself in Any Outfit" },
@@ -19,6 +22,13 @@ type Screen = "onboard" | "language" | "welcome" | "features";
 function App() {
   const [screen, setScreen] = useState<Screen>("onboard");
   const [lang, setLang] = useState("en");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/app" });
+    });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex justify-center">
@@ -44,17 +54,28 @@ function PrimaryButton({ children, ...p }: React.ButtonHTMLAttributes<HTMLButton
 }
 
 function Onboard({ onNext }: { onNext: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
   const bullets = [
     { label: "Virtual Try-On in Seconds", Icon: Sparkles },
     { label: "Realistic AI Photo Editing", Icon: Wand2 },
     { label: "Sync Across All Devices", Icon: Smartphone },
     { label: "Secure & Private", Icon: Shield },
   ];
+
+  const signIn = async () => {
+    setErr(null); setLoading(true);
+    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
+    if (r.error) { setErr(r.error.message || "Sign in failed"); setLoading(false); return; }
+    if (r.redirected) return;
+    window.location.href = "/app";
+  };
+
   return (
     <div className="flex-1 flex flex-col px-6 pt-12 pb-8 fade-up">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <div className="size-44 rounded-full bg-primary-soft grid place-items-center mb-6">
-          <img src={mascot} alt="TryOnix mascot" className="size-40 object-contain" />
+        <div className="size-44 rounded-full bg-primary-soft grid place-items-center mb-6 overflow-hidden">
+          <img src={mascot} alt="TryOnix mascot" className="size-44 object-cover" />
         </div>
         <h1 className="text-3xl font-bold text-primary tracking-tight">See Yourself in Any Outfit</h1>
         <p className="mt-3 text-muted-foreground text-sm max-w-[260px]">
@@ -75,11 +96,17 @@ function Onboard({ onNext }: { onNext: () => void }) {
       </div>
 
       <button
-        onClick={onNext}
-        className="mt-6 h-14 rounded-full border border-border bg-card font-semibold inline-flex items-center justify-center gap-3 active:scale-[0.98] transition"
+        onClick={signIn}
+        disabled={loading}
+        className="mt-6 h-14 rounded-full border border-border bg-card font-semibold inline-flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
       >
-        <GoogleIcon /> Continue with Google
+        {loading ? <Loader2 className="size-4 animate-spin" /> : <GoogleIcon />}
+        {loading ? "Signing in…" : "Continue with Google"}
       </button>
+      <button onClick={onNext} className="mt-2 text-xs text-muted-foreground underline">
+        Explore features first
+      </button>
+      {err && <p className="mt-2 text-center text-sm text-destructive">{err}</p>}
       <p className="mt-3 text-center text-[11px] text-muted-foreground">
         By continuing, you agree to our <span className="text-primary underline">Terms of Service</span>
       </p>
@@ -213,7 +240,7 @@ function Features() {
       </div>
 
       <div className="mt-4">
-        <Link to="/try-on" className="block">
+        <Link to="/app" className="block">
           <PrimaryButton>Get Started <ArrowRight className="size-4" /></PrimaryButton>
         </Link>
       </div>
