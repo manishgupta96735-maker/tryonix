@@ -14,7 +14,7 @@ export default defineConfig({
   // Force the server bundle to be generated outside Lovable too.
   // On Vercel this lets Nitro auto-detect the Vercel preset instead of shipping
   // a static/empty build that can show a blank page or 404.
-  nitro: true,
+  nitro: { preset: "vercel" },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
