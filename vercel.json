@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "bun install --frozen-lockfile",
+  "buildCommand": "bun run build",
+  "env": {
+    "NITRO_PRESET": "vercel",
+    "SUPABASE_PROJECT_ID": "uuozvnxgcfgllutdjxer",
+    "SUPABASE_URL": "https://uuozvnxgcfgllutdjxer.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1b3p2bnhnY2ZnbGx1dGRqeGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzUzODMsImV4cCI6MjA5NzMxMTM4M30.V8vF8L0fSs_d0-srMu22rFibB5swUx_--uXsbGKdg_E",
+    "VITE_SUPABASE_PROJECT_ID": "uuozvnxgcfgllutdjxer",
+    "VITE_SUPABASE_URL": "https://uuozvnxgcfgllutdjxer.supabase.co",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1b3p2bnhnY2ZnbGx1dGRqeGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzUzODMsImV4cCI6MjA5NzMxMTM4M30.V8vF8L0fSs_d0-srMu22rFibB5swUx_--uXsbGKdg_E"
+  }
+}
