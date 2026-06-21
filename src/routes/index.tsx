@@ -1,8 +1,7 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Smartphone, Loader2, Zap } from "lucide-react";
+import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Smartphone, Zap, Crown, Camera, Download } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
-import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 const mascot = mascotAsset.url;
 
@@ -17,7 +16,9 @@ export const Route = createFileRoute("/")({
   component: App,
 });
 
-type Screen = "onboard" | "language" | "welcome" | "features";
+type Screen = "onboard" | "language" | "welcome" | "features" | "how" | "ready";
+
+const ORDER: Screen[] = ["onboard", "language", "welcome", "features", "how", "ready"];
 
 function App() {
   const [screen, setScreen] = useState<Screen>("onboard");
@@ -30,14 +31,31 @@ function App() {
     });
   }, [navigate]);
 
+  const idx = ORDER.indexOf(screen);
+  const next = () => setScreen(ORDER[Math.min(idx + 1, ORDER.length - 1)]);
+  const goAuth = () => navigate({ to: "/auth" });
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex justify-center">
       <div className="w-full max-w-[440px] min-h-screen bg-background relative flex flex-col">
-        {screen === "onboard" && <Onboard onNext={() => setScreen("language")} />}
-        {screen === "language" && <Language value={lang} onChange={setLang} onNext={() => setScreen("welcome")} />}
-        {screen === "welcome" && <Welcome onNext={() => setScreen("features")} />}
-        {screen === "features" && <Features />}
+        {screen !== "onboard" && <Progress idx={idx} total={ORDER.length} />}
+        {screen === "onboard" && <Onboard onNext={next} />}
+        {screen === "language" && <Language value={lang} onChange={setLang} onNext={next} />}
+        {screen === "welcome" && <Welcome onNext={next} />}
+        {screen === "features" && <Features onNext={next} />}
+        {screen === "how" && <HowItWorks onNext={next} />}
+        {screen === "ready" && <Ready onNext={goAuth} />}
       </div>
+    </div>
+  );
+}
+
+function Progress({ idx, total }: { idx: number; total: number }) {
+  return (
+    <div className="px-6 pt-6 flex gap-1.5">
+      {Array.from({ length: total - 1 }).map((_, i) => (
+        <div key={i} className={`h-1 flex-1 rounded-full ${i < idx ? "bg-primary" : "bg-muted"}`} />
+      ))}
     </div>
   );
 }
@@ -46,7 +64,7 @@ function PrimaryButton({ children, ...p }: React.ButtonHTMLAttributes<HTMLButton
   return (
     <button
       {...p}
-      className="h-14 w-full rounded-full bg-primary text-primary-foreground font-semibold text-base inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] active:scale-[0.98] transition"
+      className="h-14 w-full rounded-full bg-primary text-primary-foreground font-semibold text-base inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] active:scale-[0.98] transition disabled:opacity-50"
     >
       {children}
     </button>
@@ -54,22 +72,12 @@ function PrimaryButton({ children, ...p }: React.ButtonHTMLAttributes<HTMLButton
 }
 
 function Onboard({ onNext }: { onNext: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
   const bullets = [
     { label: "Virtual Try-On in Seconds", Icon: Sparkles },
     { label: "Realistic AI Photo Editing", Icon: Wand2 },
     { label: "Sync Across All Devices", Icon: Smartphone },
     { label: "Secure & Private", Icon: Shield },
   ];
-
-  const signIn = async () => {
-    setErr(null); setLoading(true);
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/app" });
-    if (r.error) { setErr(r.error.message || "Sign in failed"); setLoading(false); return; }
-    if (r.redirected) return;
-    window.location.href = "/app";
-  };
 
   return (
     <div className="flex-1 flex flex-col px-6 pt-12 pb-8 fade-up">
@@ -95,18 +103,7 @@ function Onboard({ onNext }: { onNext: () => void }) {
         </div>
       </div>
 
-      <button
-        onClick={signIn}
-        disabled={loading}
-        className="mt-6 h-14 rounded-full border border-border bg-card font-semibold inline-flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
-      >
-        {loading ? <Loader2 className="size-4 animate-spin" /> : <GoogleIcon />}
-        {loading ? "Signing in…" : "Continue with Google"}
-      </button>
-      <button onClick={onNext} className="mt-2 text-xs text-muted-foreground underline">
-        Explore features first
-      </button>
-      {err && <p className="mt-2 text-center text-sm text-destructive">{err}</p>}
+      <PrimaryButton onClick={onNext}>Get Started <ArrowRight className="size-4" /></PrimaryButton>
       <p className="mt-3 text-center text-[11px] text-muted-foreground">
         By continuing, you agree to our <span className="text-primary underline">Terms of Service</span>
       </p>
@@ -116,7 +113,8 @@ function Onboard({ onNext }: { onNext: () => void }) {
 
 function Language({ value, onChange, onNext }: { value: string; onChange: (v: string) => void; onNext: () => void }) {
   const langs = [
-    { code: "en", name: "English", sub: "English", flag: "🌐" },
+    { code: "en", name: "English", sub: "English", flag: "🇬🇧" },
+    { code: "hi", name: "हिन्दी", sub: "Hindi", flag: "🇮🇳" },
     { code: "fr", name: "Français", sub: "French", flag: "🇫🇷" },
     { code: "ja", name: "日本語", sub: "Japanese", flag: "🇯🇵" },
     { code: "es", name: "Español", sub: "Spanish", flag: "🇪🇸" },
@@ -129,7 +127,7 @@ function Language({ value, onChange, onNext }: { value: string; onChange: (v: st
     { code: "tr", name: "Türkçe", sub: "Turkish", flag: "🇹🇷" },
   ];
   return (
-    <div className="flex-1 flex flex-col px-6 pt-10 pb-6 fade-up">
+    <div className="flex-1 flex flex-col px-6 pt-6 pb-6 fade-up">
       <div className="flex flex-col items-center text-center">
         <div className="size-24 rounded-full bg-primary-soft grid place-items-center mb-4">
           <img src={mascot} alt="" className="size-20 object-contain" />
@@ -173,7 +171,7 @@ function Language({ value, onChange, onNext }: { value: string; onChange: (v: st
 
 function Welcome({ onNext }: { onNext: () => void }) {
   return (
-    <div className="flex-1 flex flex-col px-6 pt-10 pb-6 fade-up">
+    <div className="flex-1 flex flex-col px-6 pt-6 pb-6 fade-up">
       <div className="flex flex-col items-center text-center">
         <div className="size-28 rounded-full bg-primary-soft grid place-items-center mb-4">
           <img src={mascot} alt="" className="size-24 object-contain" />
@@ -193,7 +191,7 @@ function Welcome({ onNext }: { onNext: () => void }) {
         </div>
       </div>
 
-      <PrimaryButton onClick={onNext}>Get Started <ArrowRight className="size-4" /></PrimaryButton>
+      <PrimaryButton onClick={onNext}>Continue <ArrowRight className="size-4" /></PrimaryButton>
     </div>
   );
 }
@@ -209,14 +207,14 @@ function DemoCard({ label, tall, tone }: { label: string; tall?: boolean; tone: 
   );
 }
 
-function Features() {
+function Features({ onNext }: { onNext: () => void }) {
   const cards = [
     { title: "AI Try-On", desc: "Upload your photo and outfit image to instantly see how it will look on you.", bg: "bg-[oklch(0.65_0.18_280)]", icon: Sparkles },
     { title: "AI Outfit Editor", desc: "Change or add any outfit piece with text. Describe changes and watch your style transform.", bg: "bg-[oklch(0.62_0.18_240)]", icon: Wand2 },
     { title: "AI Edit", desc: "Write prompts or use ready-made templates to edit images exactly the way you want.", bg: "bg-[oklch(0.68_0.18_50)]", icon: Zap },
   ];
   return (
-    <div className="flex-1 flex flex-col px-6 pt-10 pb-6 fade-up">
+    <div className="flex-1 flex flex-col px-6 pt-6 pb-6 fade-up">
       <div className="flex flex-col items-center text-center">
         <div className="size-24 rounded-full bg-primary-soft grid place-items-center mb-3">
           <img src={mascot} alt="" className="size-20 object-contain" />
@@ -240,18 +238,91 @@ function Features() {
       </div>
 
       <div className="mt-4">
-        <Link to="/app" className="block">
-          <PrimaryButton>Get Started <ArrowRight className="size-4" /></PrimaryButton>
-        </Link>
+        <PrimaryButton onClick={onNext}>Continue <ArrowRight className="size-4" /></PrimaryButton>
       </div>
     </div>
   );
 }
 
-function GoogleIcon() {
+function HowItWorks({ onNext }: { onNext: () => void }) {
+  const steps = [
+    { Icon: Camera, title: "Upload your photo", desc: "Choose a clear, full-body shot of yourself." },
+    { Icon: Shirt, title: "Pick an outfit", desc: "Upload any clothing image or paste a product link." },
+    { Icon: Sparkles, title: "Generate", desc: "Our AI fits the outfit on you in seconds." },
+    { Icon: Download, title: "Save & Share", desc: "Download in HD or share with friends instantly." },
+  ];
   return (
-    <svg viewBox="0 0 24 24" className="size-5">
-      <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.4-1.7 4.1-5.4 4.1-3.3 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.7 3.7 14.6 2.8 12 2.8c-5 0-9 4-9 9s4 9 9 9c5.2 0 8.6-3.7 8.6-8.8 0-.6-.1-1-.2-1.5H12z" />
+    <div className="flex-1 flex flex-col px-6 pt-6 pb-6 fade-up">
+      <div className="flex flex-col items-center text-center">
+        <div className="size-24 rounded-full bg-primary-soft grid place-items-center mb-3">
+          <img src={mascot} alt="" className="size-20 object-contain" />
+        </div>
+        <h1 className="text-2xl font-bold text-primary">How it Works</h1>
+        <p className="mt-1 text-sm text-muted-foreground">4 simple steps to your new look</p>
+      </div>
+
+      <div className="mt-6 space-y-3 flex-1">
+        {steps.map(({ Icon, title, desc }, i) => (
+          <div key={title} className="flex items-start gap-3 p-4 rounded-2xl border border-border bg-card">
+            <div className="size-10 rounded-full bg-primary text-primary-foreground grid place-items-center text-sm font-bold shrink-0">{i + 1}</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <Icon className="size-4 text-primary" />
+                <div className="font-semibold text-sm">{title}</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <PrimaryButton onClick={onNext}>Continue <ArrowRight className="size-4" /></PrimaryButton>
+    </div>
+  );
+}
+
+function Shirt(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
     </svg>
+  );
+}
+
+function Ready({ onNext }: { onNext: () => void }) {
+  const perks = [
+    { Icon: Crown, label: "3 free try-ons to start" },
+    { Icon: Shield, label: "Your data stays private & secure" },
+    { Icon: Smartphone, label: "Works across all your devices" },
+  ];
+  return (
+    <div className="flex-1 flex flex-col px-6 pt-6 pb-6 fade-up">
+      <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <div className="size-40 rounded-full bg-primary-soft grid place-items-center mb-6 overflow-hidden">
+          <img src={mascot} alt="" className="size-40 object-cover" />
+        </div>
+        <h1 className="text-3xl font-bold text-primary tracking-tight">You're all set!</h1>
+        <p className="mt-3 text-muted-foreground text-sm max-w-[280px]">
+          Create your account with your phone number to start trying on outfits.
+        </p>
+
+        <div className="mt-8 w-full rounded-3xl border border-border bg-card p-5 space-y-3 shadow-sm">
+          {perks.map(({ Icon, label }) => (
+            <div key={label} className="flex items-center gap-3">
+              <div className="size-9 rounded-xl bg-primary-soft grid place-items-center">
+                <Icon className="size-4 text-primary" />
+              </div>
+              <span className="text-sm font-medium flex-1 text-left">{label}</span>
+              <Check className="size-4 text-primary" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <PrimaryButton onClick={onNext}>Create Account <ArrowRight className="size-4" /></PrimaryButton>
+      <p className="mt-3 text-center text-[11px] text-muted-foreground">
+        We'll send a one-time code to verify your number.
+      </p>
+    </div>
   );
 }
