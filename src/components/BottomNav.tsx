@@ -28,6 +28,19 @@ export function BottomNav() {
   );
 }
 
+import mascotAsset from "@/assets/mascot.png.asset.json";
+
+export function BrandHeader({ title }: { title?: string }) {
+  return (
+    <div className="flex items-center gap-2 px-5 pt-5 pb-3">
+      <div className="size-9 rounded-full bg-primary-soft grid place-items-center overflow-hidden">
+        <img src={mascotAsset.url} alt="TryOnix" className="size-9 object-cover" />
+      </div>
+      <div className="font-bold text-primary text-lg">{title ?? "TryOnix"}</div>
+    </div>
+  );
+}
+
 export function MobileShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex justify-center">

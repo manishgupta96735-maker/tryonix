@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import mascotAsset from "@/assets/mascot.png.asset.json";
-import { Loader2, ArrowLeft, Phone, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -10,35 +11,16 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const COUNTRIES = [
-  { code: "+91", flag: "🇮🇳", name: "India" },
-  { code: "+1", flag: "🇺🇸", name: "USA" },
-  { code: "+44", flag: "🇬🇧", name: "UK" },
-  { code: "+61", flag: "🇦🇺", name: "Australia" },
-  { code: "+971", flag: "🇦🇪", name: "UAE" },
-  { code: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
-  { code: "+65", flag: "🇸🇬", name: "Singapore" },
-  { code: "+49", flag: "🇩🇪", name: "Germany" },
-  { code: "+33", flag: "🇫🇷", name: "France" },
-  { code: "+81", flag: "🇯🇵", name: "Japan" },
-  { code: "+82", flag: "🇰🇷", name: "Korea" },
-  { code: "+86", flag: "🇨🇳", name: "China" },
-  { code: "+55", flag: "🇧🇷", name: "Brazil" },
-  { code: "+62", flag: "🇮🇩", name: "Indonesia" },
-  { code: "+90", flag: "🇹🇷", name: "Turkey" },
-];
-
 function AuthPage() {
   const navigate = useNavigate();
-  const [step, setStep] = useState<"phone" | "otp">("phone");
-  const [country, setCountry] = useState(COUNTRIES[0]);
-  const [showPicker, setShowPicker] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [resendIn, setResendIn] = useState(0);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -46,199 +28,146 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  useEffect(() => {
-    if (resendIn <= 0) return;
-    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [resendIn]);
-
-  const fullPhone = `${country.code}${phone.replace(/\D/g, "")}`;
-
-  const sendOtp = async () => {
+  const handleEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
     setErr(null);
-    if (phone.replace(/\D/g, "").length < 6) {
-      setErr("Please enter a valid phone number");
+    setInfo(null);
+    if (!email || password.length < 6) {
+      setErr("Enter a valid email and a password of at least 6 characters.");
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone: fullPhone });
-    setLoading(false);
-    if (error) {
-      setErr(error.message);
+    if (mode === "signup") {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin + "/app" },
+      });
+      setLoading(false);
+      if (error) return setErr(error.message);
+      setInfo("Check your inbox to confirm your email, then sign in.");
+      setMode("signin");
       return;
     }
-    setStep("otp");
-    setResendIn(45);
-    setTimeout(() => otpRefs.current[0]?.focus(), 100);
-  };
-
-  const verifyOtp = async (code: string) => {
-    setErr(null);
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({ phone: fullPhone, token: code, type: "sms" });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) {
-      setErr(error.message);
-      return;
-    }
+    if (error) return setErr(error.message);
     navigate({ to: "/app" });
   };
 
-  const onOtpChange = (i: number, v: string) => {
-    const digit = v.replace(/\D/g, "").slice(-1);
-    const next = [...otp];
-    next[i] = digit;
-    setOtp(next);
-    if (digit && i < 5) otpRefs.current[i + 1]?.focus();
-    if (next.every((d) => d) && next.join("").length === 6) verifyOtp(next.join(""));
-  };
-
-  const onOtpKey = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
-  };
-
-  const onOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const txt = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (txt.length === 6) {
-      e.preventDefault();
-      setOtp(txt.split(""));
-      verifyOtp(txt);
+  const handleQuickSignIn = async () => {
+    setErr(null);
+    setOauthLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin + "/app",
+    });
+    if (result.error) {
+      setOauthLoading(false);
+      setErr("Unable to sign in. Please try again.");
+      return;
     }
+    if (result.redirected) return;
+    navigate({ to: "/app" });
   };
 
   return (
     <div className="min-h-screen bg-background flex justify-center">
       <div className="w-full max-w-[440px] min-h-screen flex flex-col px-6 pt-6 pb-8">
         <div className="flex items-center">
-          {step === "otp" ? (
-            <button onClick={() => { setStep("phone"); setOtp(["", "", "", "", "", ""]); setErr(null); }} className="size-10 rounded-full bg-card border border-border grid place-items-center">
-              <ArrowLeft className="size-4" />
-            </button>
-          ) : (
-            <Link to="/" className="size-10 rounded-full bg-card border border-border grid place-items-center">
-              <ArrowLeft className="size-4" />
-            </Link>
-          )}
+          <Link to="/" className="size-10 rounded-full bg-card border border-border grid place-items-center">
+            <ArrowLeft className="size-4" />
+          </Link>
         </div>
 
         <div className="flex-1 flex flex-col items-center text-center pt-6">
-          <div className="size-28 rounded-full bg-primary-soft grid place-items-center mb-5 overflow-hidden">
-            <img src={mascotAsset.url} alt="TryOnix" className="size-28 object-cover" />
+          <div className="size-24 rounded-full bg-primary-soft grid place-items-center mb-5 overflow-hidden">
+            <img src={mascotAsset.url} alt="TryOnix" className="size-24 object-cover" />
           </div>
 
-          {step === "phone" ? (
-            <>
-              <h1 className="text-2xl font-bold text-primary">Enter your number</h1>
-              <p className="mt-2 text-sm text-muted-foreground max-w-[300px]">
-                We'll send a 6-digit code to verify your phone number.
-              </p>
+          <h1 className="text-2xl font-bold text-primary">
+            {mode === "signin" ? "Welcome back" : "Create your account"}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground max-w-[300px]">
+            {mode === "signin"
+              ? "Sign in to continue your TryOnix journey."
+              : "Join TryOnix and start trying outfits in seconds."}
+          </p>
 
-              <div className="mt-8 w-full">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Phone number</label>
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={() => setShowPicker((v) => !v)}
-                    className="h-14 px-4 rounded-2xl border border-border bg-card font-semibold inline-flex items-center gap-2 shrink-0"
-                  >
-                    <span className="text-xl">{country.flag}</span>
-                    <span className="text-sm">{country.code}</span>
-                  </button>
-                  <div className="h-14 flex-1 rounded-2xl border border-border bg-card flex items-center px-4">
-                    <Phone className="size-4 text-muted-foreground mr-2" />
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      autoFocus
-                      placeholder="98765 43210"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="flex-1 bg-transparent outline-none text-base font-medium"
-                    />
-                  </div>
-                </div>
+          <button
+            onClick={handleQuickSignIn}
+            disabled={oauthLoading || loading}
+            className="mt-7 w-full h-14 rounded-full bg-card border border-border font-semibold inline-flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-50"
+          >
+            {oauthLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <span className="size-6 rounded-full bg-primary-soft grid place-items-center">
+                <Sparkles className="size-3.5 text-primary" />
+              </span>
+            )}
+            <span className="text-sm">Quick Sign-In</span>
+          </button>
 
-                {showPicker && (
-                  <div className="mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-card divide-y divide-border">
-                    {COUNTRIES.map((c) => (
-                      <button
-                        key={c.code + c.name}
-                        onClick={() => { setCountry(c); setShowPicker(false); }}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-muted text-left"
-                      >
-                        <span className="text-xl">{c.flag}</span>
-                        <span className="flex-1 text-sm font-medium">{c.name}</span>
-                        <span className="text-sm text-muted-foreground">{c.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+          <div className="my-5 flex items-center gap-3 w-full">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-[11px] text-muted-foreground uppercase tracking-wider">or with email</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
-                {err && <p className="mt-3 text-sm text-destructive text-left">{err}</p>}
-              </div>
-            </>
-          ) : (
-            <>
-              <h1 className="text-2xl font-bold text-primary">Verify your number</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Enter the 6-digit code sent to<br />
-                <span className="font-semibold text-foreground">{fullPhone}</span>
-              </p>
+          <form onSubmit={handleEmail} className="w-full space-y-3 text-left">
+            <div className="h-14 rounded-2xl border border-border bg-card flex items-center px-4">
+              <Mail className="size-4 text-muted-foreground mr-2" />
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-base font-medium"
+              />
+            </div>
+            <div className="h-14 rounded-2xl border border-border bg-card flex items-center px-4">
+              <Lock className="size-4 text-muted-foreground mr-2" />
+              <input
+                type={showPwd ? "text" : "password"}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-base font-medium"
+              />
+              <button type="button" onClick={() => setShowPwd((v) => !v)} className="text-muted-foreground">
+                {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
 
-              <div className="mt-8 w-full">
-                <div className="flex gap-2 justify-between">
-                  {otp.map((d, i) => (
-                    <input
-                      key={i}
-                      ref={(el) => { otpRefs.current[i] = el; }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={d}
-                      onChange={(e) => onOtpChange(i, e.target.value)}
-                      onKeyDown={(e) => onOtpKey(i, e)}
-                      onPaste={onOtpPaste}
-                      className="size-12 rounded-2xl border border-border bg-card text-center text-xl font-bold focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                    />
-                  ))}
-                </div>
+            {err && <p className="text-sm text-destructive">{err}</p>}
+            {info && <p className="text-sm text-primary">{info}</p>}
 
-                {err && <p className="mt-3 text-sm text-destructive text-left">{err}</p>}
+            <button
+              type="submit"
+              disabled={loading || oauthLoading}
+              className="h-14 w-full rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] active:scale-[0.98] transition disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+              {mode === "signin" ? "Sign In" : "Create Account"}
+            </button>
+          </form>
 
-                <div className="mt-5 text-center text-sm">
-                  {resendIn > 0 ? (
-                    <span className="text-muted-foreground">Resend code in {resendIn}s</span>
-                  ) : (
-                    <button onClick={sendOtp} className="text-primary font-semibold">Resend code</button>
-                  )}
-                </div>
-
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <ShieldCheck className="size-3.5" />
-                  Secured by end-to-end verification
-                </div>
-              </div>
-            </>
-          )}
+          <button
+            onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setErr(null); setInfo(null); }}
+            className="mt-5 text-sm text-muted-foreground"
+          >
+            {mode === "signin" ? (
+              <>New to TryOnix? <span className="text-primary font-semibold">Create account</span></>
+            ) : (
+              <>Already have an account? <span className="text-primary font-semibold">Sign in</span></>
+            )}
+          </button>
         </div>
 
-        {step === "phone" && (
-          <button
-            onClick={sendOtp}
-            disabled={loading}
-            className="h-14 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] active:scale-[0.98] transition disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-            {loading ? "Sending..." : "Send Code"}
-          </button>
-        )}
-        {step === "otp" && loading && (
-          <div className="flex items-center justify-center text-sm text-muted-foreground gap-2">
-            <Loader2 className="size-4 animate-spin" /> Verifying...
-          </div>
-        )}
-
-        <p className="mt-3 text-center text-[11px] text-muted-foreground">
-          By continuing, you agree to our <span className="text-primary underline">Terms</span> and <span className="text-primary underline">Privacy Policy</span>
+        <p className="mt-6 text-center text-[11px] text-muted-foreground">
+          By continuing, you agree to TryOnix's <span className="text-primary underline">Terms</span> and <span className="text-primary underline">Privacy Policy</span>
         </p>
       </div>
     </div>

@@ -1,7 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowRight, Check, Sparkles, Wand2, Image as ImageIcon, Shield, Smartphone, Zap, Crown, Camera, Download } from "lucide-react";
+import { ArrowRight, Check, Sparkles, Wand2, Shield, Smartphone, Zap, Crown, Camera, Download } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
+import demoPerson from "@/assets/demo-person.jpg";
+import demoOutfit from "@/assets/demo-outfit.jpg";
+import demoResult from "@/assets/demo-result.jpg";
 import { supabase } from "@/integrations/supabase/client";
 const mascot = mascotAsset.url;
 
@@ -182,12 +185,12 @@ function Welcome({ onNext }: { onNext: () => void }) {
 
       <div className="flex-1 flex flex-col items-center justify-center my-6">
         <div className="grid grid-cols-2 gap-3 w-full">
-          <DemoCard label="Your image" tone="bg-muted" />
-          <DemoCard label="Your outfit" tone="bg-accent" />
+          <DemoCard label="Your image" src={demoPerson} />
+          <DemoCard label="Your outfit" src={demoOutfit} />
         </div>
         <div className="my-4 h-10 w-px border-l-2 border-dashed border-primary/40" />
         <div className="w-1/2">
-          <DemoCard label="This is how it looks on you" tall tone="bg-primary-soft" />
+          <DemoCard label="This is how it looks on you" tall src={demoResult} />
         </div>
       </div>
 
@@ -196,13 +199,11 @@ function Welcome({ onNext }: { onNext: () => void }) {
   );
 }
 
-function DemoCard({ label, tall, tone }: { label: string; tall?: boolean; tone: string }) {
+function DemoCard({ label, tall, src }: { label: string; tall?: boolean; src: string }) {
   return (
-    <div className={`rounded-2xl border border-border ${tone} ${tall ? "aspect-[3/4]" : "aspect-square"} p-3 flex flex-col justify-between shadow-sm`}>
-      <span className="text-[10px] font-semibold bg-card px-2 py-1 rounded-full self-start shadow-sm">{label}</span>
-      <div className="grid place-items-center flex-1">
-        <ImageIcon className="size-8 text-muted-foreground/40" />
-      </div>
+    <div className={`relative rounded-2xl border border-border overflow-hidden ${tall ? "aspect-[3/4]" : "aspect-square"} shadow-sm bg-card`}>
+      <img src={src} alt={label} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+      <span className="absolute top-2 left-2 text-[10px] font-semibold bg-card/95 backdrop-blur px-2 py-1 rounded-full shadow-sm">{label}</span>
     </div>
   );
 }
@@ -303,7 +304,7 @@ function Ready({ onNext }: { onNext: () => void }) {
         </div>
         <h1 className="text-3xl font-bold text-primary tracking-tight">You're all set!</h1>
         <p className="mt-3 text-muted-foreground text-sm max-w-[280px]">
-          Create your account with your phone number to start trying on outfits.
+          Create your TryOnix account in seconds and start trying on outfits.
         </p>
 
         <div className="mt-8 w-full rounded-3xl border border-border bg-card p-5 space-y-3 shadow-sm">
@@ -321,7 +322,7 @@ function Ready({ onNext }: { onNext: () => void }) {
 
       <PrimaryButton onClick={onNext}>Create Account <ArrowRight className="size-4" /></PrimaryButton>
       <p className="mt-3 text-center text-[11px] text-muted-foreground">
-        We'll send a one-time code to verify your number.
+        Quick sign-in or email — your choice.
       </p>
     </div>
   );
