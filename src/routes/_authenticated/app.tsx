@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import tryonixLogo from "@/assets/mascot.png.asset.json";
 import { useEffect, useRef, useState } from "react";
 import {
   Sparkles, Download, Loader2, ImageIcon, Shirt, Zap, Plus, RefreshCw, Crown, LogOut,
@@ -92,7 +93,7 @@ function AppPage() {
             <div className="font-semibold text-sm truncate max-w-[140px]">{name.split(" ")[0] || "there"}</div>
           </div>
         </div>
-        <div className="font-bold text-lg text-primary">TryOnix</div>
+        <div className="flex items-center gap-2"><div className="size-8 rounded-full bg-primary-soft overflow-hidden grid place-items-center"><img src={tryonixLogo.url} alt="TryOnix" className="size-8 object-cover" /></div><div className="font-bold text-lg text-primary">TryOnix</div></div>
         <div className="flex items-center gap-1 bg-card border border-border rounded-full px-3 h-10">
           <Zap className="size-4 text-[oklch(0.72_0.17_70)] fill-[oklch(0.72_0.17_70)]" />
           <span className="text-sm font-bold">{credits}</span>

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import tryonixLogo from "@/assets/mascot.png.asset.json";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,7 +46,7 @@ function SettingsPage() {
     <MobileShell>
       <header className="px-5 pt-5 pb-3 flex items-center justify-between">
         <div className="font-bold text-lg">Settings</div>
-        <div className="font-bold text-lg text-primary">TryOnix</div>
+        <div className="flex items-center gap-2"><div className="size-8 rounded-full bg-primary-soft overflow-hidden grid place-items-center"><img src={tryonixLogo.url} alt="TryOnix" className="size-8 object-cover" /></div><div className="font-bold text-lg text-primary">TryOnix</div></div>
         <div className="w-10" />
       </header>
 
