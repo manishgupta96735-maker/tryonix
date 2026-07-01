@@ -28,13 +28,16 @@ export const Logo = ({ size = 56 }: { size?: number }) => (
         width: size,
         height: size,
         borderRadius: size / 2,
-        background: COLORS.primarySoft,
-        overflow: "hidden",
+        background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryDark})`,
         display: "grid",
         placeItems: "center",
+        color: COLORS.cream,
+        fontWeight: 900,
+        fontSize: size * 0.55,
+        boxShadow: `0 4px 20px ${COLORS.primary}55`,
       }}
     >
-      <img src="/images/mascot.png" style={{ width: size, height: size, objectFit: "cover" }} />
+      T
     </div>
     <div style={{ color: COLORS.cream, fontWeight: 800, fontSize: size * 0.55, letterSpacing: -0.5 }}>
       TryOnix
