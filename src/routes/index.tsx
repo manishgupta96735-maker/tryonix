@@ -414,9 +414,9 @@ function Footer() {
             ))}
           </div>
         </div>
-        <FooterCol title="Product" links={["Features", "Pricing", "How it works", "Try free"]} />
-        <FooterCol title="Company" links={["About", "Blog", "Careers", "Contact"]} />
-        <FooterCol title="Legal" links={["Privacy", "Terms", "Security", "Cookies"]} />
+        <FooterCol title="Product" links={[{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "How it works", href: "#how" }, { label: "Try free", href: "/app" }]} />
+        <FooterCol title="Company" links={[{ label: "About", href: "#" }, { label: "Blog", href: "#" }, { label: "Careers", href: "#" }, { label: "Contact", href: "mailto:hello@tryonix.app" }]} />
+        <FooterCol title="Legal" links={[{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Security", href: "/privacy" }, { label: "Cookies", href: "/privacy" }]} />
       </div>
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
@@ -428,12 +428,12 @@ function Footer() {
   );
 }
 
-function FooterCol({ title, links }: { title: string; links: string[] }) {
+function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
     <div>
       <div className="text-sm font-bold">{title}</div>
       <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-        {links.map(l => <li key={l}><a href="#" className="hover:text-foreground transition">{l}</a></li>)}
+        {links.map(l => <li key={l.label}><a href={l.href} className="hover:text-foreground transition">{l.label}</a></li>)}
       </ul>
     </div>
   );
