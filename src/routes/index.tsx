@@ -415,7 +415,7 @@ function Footer() {
           </div>
         </div>
         <FooterCol title="Product" links={[{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "How it works", href: "#how" }, { label: "Try free", href: "/app" }]} />
-        <FooterCol title="Company" links={[{ label: "About", href: "#" }, { label: "Blog", href: "#" }, { label: "Careers", href: "#" }, { label: "Contact", href: "mailto:hello@tryonix.app" }]} />
+        <FooterCol title="Company" links={[{ label: "About", href: "/about" }, { label: "Blog", href: "#" }, { label: "Careers", href: "#" }, { label: "Contact", href: "/contact" }]} />
         <FooterCol title="Legal" links={[{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Security", href: "/privacy" }, { label: "Cookies", href: "/privacy" }]} />
       </div>
       <div className="border-t border-border">
