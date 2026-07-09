@@ -89,6 +89,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "Upload your photo and virtually try outfits instantly using AI." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
+      { name: "theme-color", content: "#22c55e" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "TryOnix" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -97,10 +101,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
     ],
-    meta: (
-      // theme-color merged below in an appended meta list
-      undefined as unknown as never
-    ),
   }),
   shellComponent: RootShell,
   component: RootComponent,
