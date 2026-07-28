@@ -114,7 +114,7 @@ function SettingsPage() {
         <button onClick={signOut} className="h-12 w-full rounded-full border border-border bg-card font-semibold inline-flex items-center justify-center gap-2 text-destructive">
           <LogOut className="size-4" /> Sign out
         </button>
-      </main>
+      </div>
     </MobileShell>
   );
 }
