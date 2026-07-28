@@ -33,13 +33,13 @@ function HistoryPage() {
 
   return (
     <MobileShell>
-      <header className="px-5 pt-5 pb-3 flex items-center justify-between">
-        <div className="font-bold text-lg">My Images</div>
-        <div className="flex items-center gap-2"><div className="size-8 rounded-full bg-primary-soft overflow-hidden grid place-items-center"><img src={tryonixLogo.url} alt="TryOnix" className="size-8 object-cover" /></div><div className="font-bold text-lg text-primary">TryOnix</div></div>
-        <div className="w-10" />
+      <header className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">My Try-Ons</h1>
+        <p className="text-sm text-muted-foreground mt-1">Your saved try-on results.</p>
       </header>
 
-      <main className="px-5 flex-1">
+      <div>
+
         {items === null && (
           <div className="grid place-items-center py-20"><Loader2 className="size-6 animate-spin text-primary" /></div>
         )}
