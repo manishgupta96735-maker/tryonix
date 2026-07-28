@@ -90,14 +90,18 @@ export const Route = createFileRoute("/api/tryon")({
             return Response.json({ error: "AI returned no image. Please retry." }, { status: 500 });
           }
 
-          // Deduct credit + save history
-          const newBalance = creditRow.balance - 1;
-          await supabaseAdmin.from("user_credits").update({ balance: newBalance, updated_at: new Date().toISOString() }).eq("user_id", userId);
-          await supabaseAdmin.from("tryon_history").insert({
-            user_id: userId,
-            result_url: imageUrl,
-            hd: useHd,
-          });
+          // Deduct credit + save history for signed-in users only
+          let newBalance: number | null = null;
+          if (userId && creditRow) {
+            newBalance = creditRow.balance - 1;
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("user_credits").update({ balance: newBalance, updated_at: new Date().toISOString() }).eq("user_id", userId);
+            await supabaseAdmin.from("tryon_history").insert({
+              user_id: userId,
+              result_url: imageUrl,
+              hd: useHd,
+            });
+          }
 
           return Response.json({ image: imageUrl, creditsRemaining: newBalance, hd: useHd });
         } catch (err) {
