@@ -33,8 +33,10 @@ function SettingsPage() {
     })();
   }, []);
 
+  const [notice, setNotice] = useState<string | null>(null);
   const checkout = (plan: string) => {
-    alert(`Checkout for ${plan} plan coming soon. Payments integration is not enabled yet — ask to enable Stripe to activate this flow.`);
+    setNotice(`Checkout for the ${plan.toUpperCase()} plan is coming soon. Payments will be enabled shortly.`);
+    setTimeout(() => setNotice(null), 4000);
   };
 
   const signOut = async () => {
@@ -44,13 +46,19 @@ function SettingsPage() {
 
   return (
     <MobileShell>
-      <header className="px-5 pt-5 pb-3 flex items-center justify-between">
-        <div className="font-bold text-lg">Settings</div>
-        <div className="flex items-center gap-2"><div className="size-8 rounded-full bg-primary-soft overflow-hidden grid place-items-center"><img src={tryonixLogo.url} alt="TryOnix" className="size-8 object-cover" /></div><div className="font-bold text-lg text-primary">TryOnix</div></div>
-        <div className="w-10" />
+      <header className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage your account, credits, and plan.</p>
       </header>
 
-      <main className="px-5 flex-1 space-y-5">
+      {notice && (
+        <div className="mb-5 rounded-2xl border border-border bg-primary-soft text-primary px-4 py-3 text-sm font-medium">
+          {notice}
+        </div>
+      )}
+
+      <div className="space-y-5 max-w-2xl mx-auto">
+
         <div className="bg-card border border-border rounded-3xl p-5 flex items-center gap-3">
           <div className="size-12 rounded-full bg-primary-soft grid place-items-center font-bold text-primary">
             {(name || email).charAt(0).toUpperCase()}
@@ -106,7 +114,7 @@ function SettingsPage() {
         <button onClick={signOut} className="h-12 w-full rounded-full border border-border bg-card font-semibold inline-flex items-center justify-center gap-2 text-destructive">
           <LogOut className="size-4" /> Sign out
         </button>
-      </main>
+      </div>
     </MobileShell>
   );
 }
