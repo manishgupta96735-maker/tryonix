@@ -83,26 +83,23 @@ function AppPage() {
 
   return (
     <MobileShell>
-      <header className="px-5 pt-5 pb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="size-9 rounded-full bg-primary-soft grid place-items-center text-xs font-bold text-primary">
-            {name.charAt(0).toUpperCase() || "U"}
-          </div>
-          <div className="text-xs">
-            <div className="text-muted-foreground">Hello</div>
-            <div className="font-semibold text-sm truncate max-w-[140px]">{name.split(" ")[0] || "there"}</div>
-          </div>
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Virtual Try-On</h1>
+          <p className="text-sm text-muted-foreground mt-1">Hi {name.split(" ")[0] || "there"} — upload your photo and any outfit.</p>
         </div>
-        <div className="flex items-center gap-2"><div className="size-8 rounded-full bg-primary-soft overflow-hidden grid place-items-center"><img src={tryonixLogo.url} alt="TryOnix" className="size-8 object-cover" /></div><div className="font-bold text-lg text-primary">TryOnix</div></div>
-        <div className="flex items-center gap-1 bg-card border border-border rounded-full px-3 h-10">
+        <div className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 h-10 shrink-0">
           <Zap className="size-4 text-[oklch(0.72_0.17_70)] fill-[oklch(0.72_0.17_70)]" />
           <span className="text-sm font-bold">{credits}</span>
+          <span className="text-xs text-muted-foreground ml-1 hidden sm:inline">credits</span>
         </div>
       </header>
 
-      <main className="px-5 flex-1 space-y-5">
-        <UploadCard label="Image" hint="Tap to choose from camera or gallery" icon={ImageIcon} value={personImg} onChange={setPersonImg} placeholder="Select Your Image" />
-        <UploadCard label="Outfit Image" hint="Tap to choose from camera or gallery" icon={Shirt} value={clothImg} onChange={setClothImg} placeholder="Select Outfit" />
+      <div className="space-y-5 max-w-2xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-5">
+        <UploadCard label="Your Photo" hint="Click to upload from your device" icon={ImageIcon} value={personImg} onChange={setPersonImg} placeholder="Select Your Image" />
+        <UploadCard label="Outfit" hint="Click to upload from your device" icon={Shirt} value={clothImg} onChange={setClothImg} placeholder="Select Outfit" />
+        </div>
 
         <div className="flex items-center justify-between bg-card border border-border rounded-2xl p-4">
           <div className="flex items-center gap-3">
