@@ -8,18 +8,29 @@ export const Route = createFileRoute("/api/tryon")({
         try {
           const authHeader = request.headers.get("authorization") || "";
           const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-          if (!token) return Response.json({ error: "Sign in required" }, { status: 401 });
 
-          const SUPABASE_URL = process.env.SUPABASE_URL!;
-          const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
-          const userClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-            global: { headers: { Authorization: `Bearer ${token}` } },
-            auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
-          });
+          let userId: string | null = null;
+          let creditRow: { balance: number; is_pro: boolean } | null = null;
 
-          const { data: userRes, error: userErr } = await userClient.auth.getUser(token);
-          if (userErr || !userRes.user) return Response.json({ error: "Invalid session" }, { status: 401 });
-          const userId = userRes.user.id;
+          if (token) {
+            const SUPABASE_URL = process.env.SUPABASE_URL!;
+            const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
+            const userClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+              global: { headers: { Authorization: `Bearer ${token}` } },
+              auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+            });
+            const { data: userRes } = await userClient.auth.getUser(token);
+            if (userRes.user) {
+              userId = userRes.user.id;
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              const { data } = await supabaseAdmin
+                .from("user_credits").select("balance,is_pro").eq("user_id", userId).maybeSingle();
+              creditRow = data ?? null;
+              if (!creditRow || creditRow.balance <= 0) {
+                return Response.json({ error: "You're out of credits. Upgrade to Pro for more." }, { status: 402 });
+              }
+            }
+          }
 
           const { personImage, clothImage, hd } = (await request.json()) as {
             personImage?: string; clothImage?: string; hd?: boolean;
@@ -28,14 +39,7 @@ export const Route = createFileRoute("/api/tryon")({
             return Response.json({ error: "Both images required" }, { status: 400 });
           }
 
-          // Check credits via admin client (RLS bypass for atomic deduct)
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: creditRow } = await supabaseAdmin
-            .from("user_credits").select("balance,is_pro").eq("user_id", userId).maybeSingle();
-          if (!creditRow || creditRow.balance <= 0) {
-            return Response.json({ error: "You're out of credits. Upgrade to Pro for more." }, { status: 402 });
-          }
-          const useHd = !!hd && creditRow.is_pro;
+          const useHd = !!hd && !!creditRow?.is_pro;
 
           const key = process.env.LOVABLE_API_KEY;
           if (!key) return Response.json({ error: "AI not configured" }, { status: 500 });
