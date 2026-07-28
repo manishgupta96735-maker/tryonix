@@ -1,18 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import tryonixLogo from "@/assets/mascot.png.asset.json";
 import { useEffect, useRef, useState } from "react";
 import {
-  Sparkles, Download, Loader2, ImageIcon, Shirt, Zap, Plus, RefreshCw, Crown, LogOut,
+  Sparkles, Download, Loader2, ImageIcon, Shirt, Zap, Plus, RefreshCw, Crown, LogIn,
 } from "lucide-react";
 import { MobileShell } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/_authenticated/app")({
-  head: () => ({ meta: [{ title: "Try On — TryOnix" }] }),
+export const Route = createFileRoute("/app")({
+  ssr: false,
+  head: () => ({ meta: [{ title: "Try-On Studio — TryOnix" }] }),
   component: AppPage,
 });
 
 type ErrKind = "rate" | "credits" | "auth" | "other";
+
+const GUEST_KEY = "tryonix_guest_credits_v1";
+const GUEST_START = 3;
+
+function readGuestCredits() {
+  if (typeof window === "undefined") return GUEST_START;
+  const v = window.localStorage.getItem(GUEST_KEY);
+  if (v === null) {
+    window.localStorage.setItem(GUEST_KEY, String(GUEST_START));
+    return GUEST_START;
+  }
+  const n = Number(v);
+  return Number.isFinite(n) ? n : GUEST_START;
+}
 
 function AppPage() {
   const [personImg, setPersonImg] = useState<string | null>(null);
@@ -21,14 +35,20 @@ function AppPage() {
   const [loading, setLoading] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
   const [errKind, setErrKind] = useState<ErrKind | null>(null);
-  const [credits, setCredits] = useState<number>(0);
+  const [credits, setCredits] = useState<number>(GUEST_START);
   const [isPro, setIsPro] = useState(false);
   const [hd, setHd] = useState(false);
   const [name, setName] = useState<string>("");
+  const [signedIn, setSignedIn] = useState(false);
 
   const loadProfile = async () => {
     const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return;
+    if (!u.user) {
+      setSignedIn(false);
+      setCredits(readGuestCredits());
+      return;
+    }
+    setSignedIn(true);
     setName(u.user.user_metadata?.full_name || u.user.email || "");
     const { data } = await supabase
       .from("user_credits")
@@ -68,7 +88,13 @@ function AppPage() {
         throw new Error(data.error || "Generation failed");
       }
       setResult(data.image);
-      setCredits(data.creditsRemaining ?? Math.max(0, credits - 1));
+      if (signedIn) {
+        setCredits(data.creditsRemaining ?? Math.max(0, credits - 1));
+      } else {
+        const next = Math.max(0, credits - 1);
+        window.localStorage.setItem(GUEST_KEY, String(next));
+        setCredits(next);
+      }
     } catch (e: any) {
       setErrMsg(e.message || "Something went wrong");
     } finally {
@@ -76,17 +102,22 @@ function AppPage() {
     }
   };
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/auth";
+  const reset = () => {
+    setPersonImg(null);
+    setClothImg(null);
+    setResult(null);
+    setErrMsg(null);
+    setErrKind(null);
   };
 
   return (
     <MobileShell>
-      <header className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Virtual Try-On</h1>
-          <p className="text-sm text-muted-foreground mt-1">Hi {name.split(" ")[0] || "there"} — upload your photo and any outfit.</p>
+      <header className="flex items-center justify-between mb-6 gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight truncate">Try-On Studio</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {signedIn ? `Welcome back${name ? ", " + name.split(" ")[0] : ""} — upload a photo and any outfit.` : "Free preview — no sign-in needed. Upload a photo and an outfit."}
+          </p>
         </div>
         <div className="flex items-center gap-1.5 bg-card border border-border rounded-full px-4 h-10 shrink-0">
           <Zap className="size-4 text-[oklch(0.72_0.17_70)] fill-[oklch(0.72_0.17_70)]" />
@@ -97,24 +128,24 @@ function AppPage() {
 
       <div className="space-y-5 max-w-2xl mx-auto">
         <div className="grid sm:grid-cols-2 gap-5">
-        <UploadCard label="Your Photo" hint="Click to upload from your device" icon={ImageIcon} value={personImg} onChange={setPersonImg} placeholder="Select Your Image" />
-        <UploadCard label="Outfit" hint="Click to upload from your device" icon={Shirt} value={clothImg} onChange={setClothImg} placeholder="Select Outfit" />
+          <UploadCard label="Your Photo" hint="Click to upload from your device" icon={ImageIcon} value={personImg} onChange={setPersonImg} placeholder="Select Your Image" />
+          <UploadCard label="Outfit" hint="Click to upload from your device" icon={Shirt} value={clothImg} onChange={setClothImg} placeholder="Select Outfit" />
         </div>
 
         <div className="flex items-center justify-between bg-card border border-border rounded-2xl p-4">
-          <div className="flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-primary-soft grid place-items-center">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="size-9 rounded-xl bg-primary-soft grid place-items-center shrink-0">
               <Crown className="size-4 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="font-semibold text-sm">HD output (2048px)</div>
-              <div className="text-xs text-muted-foreground">{isPro ? "Pro enabled" : "Pro only — upgrade in Settings"}</div>
+              <div className="text-xs text-muted-foreground truncate">{isPro ? "Pro enabled" : "Pro only — upgrade in Settings"}</div>
             </div>
           </div>
           <button
             disabled={!isPro}
             onClick={() => setHd(v => !v)}
-            className={`h-6 w-11 rounded-full transition relative ${hd && isPro ? "bg-primary" : "bg-muted"} disabled:opacity-40`}
+            className={`h-6 w-11 rounded-full transition relative shrink-0 ${hd && isPro ? "bg-primary" : "bg-muted"} disabled:opacity-40`}
           >
             <span className={`absolute top-0.5 size-5 rounded-full bg-white shadow transition ${hd && isPro ? "left-5" : "left-0.5"}`} />
           </button>
@@ -126,19 +157,19 @@ function AppPage() {
             disabled={!personImg || !clothImg || loading || credits <= 0}
             className="h-14 w-full rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] disabled:opacity-40 active:scale-[0.98] transition"
           >
-            {loading ? <><Loader2 className="size-4 animate-spin" /> Generating…</> : <><Sparkles className="size-4" /> Generate Try-On (1 credit)</>}
+            {loading ? <><Loader2 className="size-4 animate-spin" /> Generating…</> : <><Sparkles className="size-4" /> Generate Try-On</>}
           </button>
           {credits <= 0 && !loading && (
-            <Link to="/settings" className="mt-3 block text-center text-sm text-primary font-semibold underline">
-              You're out of credits — upgrade to Pro
+            <Link to={signedIn ? "/settings" : "/auth"} className="mt-3 block text-center text-sm text-primary font-semibold underline">
+              {signedIn ? "You're out of credits — upgrade to Pro" : "Free previews used — sign in to get more credits"}
             </Link>
           )}
           {errMsg && (
             <div className="mt-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-center">
               <p className="text-sm font-semibold text-destructive">{errMsg}</p>
               {errKind === "credits" ? (
-                <Link to="/settings" className="mt-3 inline-block h-10 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold leading-10">
-                  Get more credits
+                <Link to={signedIn ? "/settings" : "/auth"} className="mt-3 inline-block h-10 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold leading-10">
+                  {signedIn ? "Get more credits" : "Sign in for more"}
                 </Link>
               ) : (
                 <button onClick={generate} className="mt-3 inline-flex items-center gap-2 h-10 px-5 rounded-full bg-card border border-border text-sm font-semibold">
@@ -151,7 +182,14 @@ function AppPage() {
 
         {(loading || result) && (
           <div className="pt-3">
-            <h2 className="font-bold text-base mb-3">Result</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-base">Result</h2>
+              {result && !loading && (
+                <button onClick={reset} className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                  <RefreshCw className="size-3" /> Start over
+                </button>
+              )}
+            </div>
             <div className="rounded-3xl border border-border overflow-hidden aspect-[3/4] bg-muted relative">
               {loading && (
                 <div className="absolute inset-0 grid place-items-center">
@@ -171,9 +209,11 @@ function AppPage() {
           </div>
         )}
 
-        <button onClick={signOut} className="text-xs text-muted-foreground flex items-center gap-1 mx-auto pt-4">
-          <LogOut className="size-3" /> Sign out
-        </button>
+        {!signedIn && (
+          <Link to="/auth" className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground pt-4 hover:text-foreground">
+            <LogIn className="size-3" /> Sign in to save history & unlock HD
+          </Link>
+        )}
       </div>
     </MobileShell>
   );
@@ -193,7 +233,7 @@ function UploadCard({
     <div>
       <div
         onClick={() => ref.current?.click()}
-        className="aspect-[5/3] rounded-3xl border border-border bg-card cursor-pointer overflow-hidden relative grid place-items-center shadow-sm"
+        className="aspect-[5/3] rounded-3xl border border-border bg-card cursor-pointer overflow-hidden relative grid place-items-center shadow-sm hover:border-primary/40 transition"
       >
         <input ref={ref} type="file" accept="image/*" className="hidden" onChange={e => pick(e.target.files?.[0] ?? undefined)} />
         {value ? (
