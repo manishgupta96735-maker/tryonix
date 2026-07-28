@@ -174,7 +174,7 @@ function AppPage() {
         <button onClick={signOut} className="text-xs text-muted-foreground flex items-center gap-1 mx-auto pt-4">
           <LogOut className="size-3" /> Sign out
         </button>
-      </main>
+      </div>
     </MobileShell>
   );
 }
