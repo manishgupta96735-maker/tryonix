@@ -62,7 +62,7 @@ function HistoryPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {preview && (
         <div onClick={() => setPreview(null)} className="fixed inset-0 bg-black/70 z-30 grid place-items-center p-6">
