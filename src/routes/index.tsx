@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import {
-  ArrowRight, Check, Sparkles, Wand2, Shield, Zap, Crown,
-  Camera, Download, Star, Twitter, Instagram, Github,
+  ArrowDown, Check, ChevronDown, Download, ImagePlus, Lock, ScanFace,
+  Shirt, Sparkles, UploadCloud, UserRound, Wand2, Zap, Twitter, Instagram, MessageCircle,
 } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
 import demoPerson from "@/assets/demo-person.jpg";
-import demoOutfit from "@/assets/demo-outfit.jpg";
 import demoResult from "@/assets/demo-result.jpg";
 
 const mascot = mascotAsset.url;
@@ -14,12 +14,14 @@ export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "TryOnix — See Yourself in Any Outfit with AI" },
-      { name: "description", content: "TryOnix is a photoreal AI virtual try-on. Upload your photo and any outfit — see the result in seconds. No sign-up needed to try." },
-      { property: "og:title", content: "TryOnix — Virtual AI Try-On" },
-      { property: "og:description", content: "Upload a photo, drop in any outfit, and see it on you — photoreal, in seconds." },
+      { title: "TryOnix — Try Clothes Before Buying with AI" },
+      { name: "description", content: "Upload your photo and any outfit. TryOnix creates a realistic AI try-on in under 10 seconds. No account required, 3 free generations." },
+      { property: "og:title", content: "TryOnix — Try Clothes Before Buying" },
+      { property: "og:description", content: "Realistic AI virtual try-on in under 10 seconds. No account required." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "TryOnix — Try Clothes Before Buying" },
+      { name: "twitter:description", content: "Realistic AI virtual try-on in under 10 seconds. No account required." },
     ],
   }),
   component: LandingPage,
@@ -27,416 +29,431 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased">
-      <Nav />
-      <Hero />
-      <Marquee />
-      <Features />
-      <HowItWorks />
-      <DemoShowcase />
-      <Pricing />
-      <Testimonials />
-      <FinalCTA />
+    <div className="min-h-screen bg-background text-foreground antialiased">
+      <Navbar />
+      <main>
+        <Hero />
+        <UploadSection />
+        <Steps />
+        <Comparison />
+        <Benefits />
+        <Pricing />
+        <Faq />
+      </main>
       <Footer />
     </div>
   );
 }
 
-/* ---------- NAV ---------- */
-function Nav() {
+/* ── Section 1 · Navbar ────────────────────────────── */
+function Navbar() {
+  const [open, setOpen] = useState(false);
+  const links = [
+    { href: "#how", label: "How It Works" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#faq", label: "FAQ" },
+  ];
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/70 border-b border-border/60">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5 min-w-0">
-          <img src={mascot} alt="TryOnix" className="size-9 rounded-full object-cover ring-1 ring-border" />
-          <span className="font-bold text-lg tracking-tight">TryOnix</span>
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-2.5">
+          <img src={mascot} alt="" className="size-8 shrink-0 rounded-xl object-cover" />
+          <span className="text-[19px] font-bold tracking-tight">TryOnix</span>
         </Link>
-        <nav className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-          <a href="#features" className="hover:text-foreground transition">Features</a>
-          <a href="#how" className="hover:text-foreground transition">How it works</a>
-          <a href="#pricing" className="hover:text-foreground transition">Pricing</a>
-          <a href="#reviews" className="hover:text-foreground transition">Reviews</a>
+
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] text-muted-foreground md:flex">
+          {links.map((l) => (
+            <a key={l.href} href={l.href} className="transition-colors hover:text-foreground">{l.label}</a>
+          ))}
         </nav>
+
         <div className="flex items-center gap-2">
-          <Link to="/auth" className="hidden sm:inline-flex h-10 px-4 items-center text-sm font-medium text-muted-foreground hover:text-foreground transition">
-            Sign in
+          <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:block">
+            Sign In
           </Link>
-          <Link
-            to="/app"
-            className="h-10 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center gap-1.5 shadow-[0_6px_20px_-8px_oklch(0.52_0.16_152/0.6)] hover:brightness-110 active:scale-[0.98] transition"
+          <Link to="/app" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
+            Start Free
+          </Link>
+          <button
+            type="button"
+            aria-label="Menu"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="rounded-full border border-border p-2 md:hidden"
           >
-            Try Free <ArrowRight className="size-3.5" />
-          </Link>
+            <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} />
+          </button>
         </div>
       </div>
+      {open && (
+        <div className="border-t border-border bg-background md:hidden">
+          <div className="mx-auto flex max-w-6xl flex-col px-5 py-2">
+            {[...links, { href: "/auth", label: "Sign In" }].map((l) => (
+              <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="py-3 text-[15px] text-muted-foreground">
+                {l.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
-/* ---------- HERO ---------- */
+/* ── Section 2 · Hero ──────────────────────────────── */
 function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.94_0.08_150/0.6),transparent_60%)]" />
-      <div className="absolute inset-x-0 -top-40 -z-10 opacity-40 blur-3xl">
-        <div className="mx-auto aspect-[1155/678] w-[72rem] bg-gradient-to-tr from-primary/40 to-primary/10" style={{ clipPath: "polygon(74% 44%, 100% 61%, 97% 26%, 85% 0%, 80% 2%, 72% 32%, 60% 62%, 52% 68%, 47% 58%, 45% 34%, 27% 76%, 0% 64%, 17% 100%, 27% 76%, 76% 97%, 74% 44%)" }} />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-20 sm:pb-28 grid lg:grid-cols-[1.05fr_1fr] gap-12 lg:gap-16 items-center">
+      <div
+        aria-hidden
+        className="float-blob pointer-events-none absolute -right-40 -top-40 size-[620px] rounded-full opacity-60 blur-3xl"
+        style={{ background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%)" }}
+      />
+      <div className="mx-auto grid max-w-6xl items-center gap-14 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
         <div className="fade-up">
-          <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-primary-soft text-primary text-xs font-semibold">
-            <Sparkles className="size-3.5" /> Photoreal AI Try-On
-          </div>
-          <h1 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.02]">
-            See yourself in
-            <br className="hidden sm:block" />{" "}
-            <span className="text-primary">any outfit</span>
-            <span className="text-muted-foreground/60"> — instantly.</span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
+            <Sparkles className="size-3.5" /> AI Virtual Try-On
+          </span>
+          <h1 className="mt-6 text-[clamp(2.6rem,6.4vw,4.4rem)] font-extrabold leading-[1.02] tracking-[-0.035em]">
+            Try Clothes
+            <br />
+            <span className="text-primary">Before Buying</span>
           </h1>
-          <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-            Upload your photo, drop in any garment, and TryOnix's AI puts it on you
-            in seconds. Photoreal, HD, and ready to share — no sign-up needed to try.
+          <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted-foreground">
+            Upload your photo. Upload any outfit.
+            <br className="hidden sm:block" /> Get realistic AI try-on in under 10 seconds.
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <Link
-              to="/app"
-              className="h-13 px-7 py-3.5 rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center gap-2 shadow-[0_10px_30px_-10px_oklch(0.52_0.16_152/0.7)] hover:brightness-110 active:scale-[0.98] transition"
-            >
-              Try it Free — 3 previews <ArrowRight className="size-4" />
-            </Link>
-            <a href="#how" className="h-13 px-6 py-3.5 rounded-full border border-border font-semibold text-sm hover:bg-card transition">
-              See how it works
+          <div className="mt-9">
+            <a href="#upload" className="btn-glow inline-flex items-center gap-2.5 rounded-full bg-primary px-8 py-4 text-base font-semibold text-primary-foreground">
+              <UploadCloud className="size-5" /> Upload Photo
             </a>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5"><Check className="size-4 text-primary" /> No sign-up to try</div>
-            <div className="flex items-center gap-1.5"><Check className="size-4 text-primary" /> No credit card</div>
-            <div className="flex items-center gap-1.5"><Check className="size-4 text-primary" /> HD downloads</div>
-          </div>
+          <ul className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-muted-foreground">
+            {["No account required", "3 Free Generations"].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <Check className="size-4 text-primary" /> {t}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Hero visual */}
-        <div className="fade-up relative">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <div className="space-y-3 sm:space-y-4">
-              <HeroImg src={demoPerson} tag="Your photo" />
-              <HeroImg src={demoOutfit} tag="Any outfit" />
-            </div>
-            <div className="relative">
-              <HeroImg src={demoResult} tag="AI result" tall />
-              <div className="absolute -top-3 -right-3 h-10 px-3 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1 shadow-xl rotate-3">
-                <Sparkles className="size-3.5" /> Photoreal
-              </div>
-            </div>
-          </div>
-          <div className="absolute -bottom-5 -left-4 sm:-left-6 h-12 px-4 rounded-2xl bg-card border border-border shadow-lg flex items-center gap-2 text-sm font-semibold">
-            <div className="size-8 rounded-full bg-primary-soft grid place-items-center">
-              <Zap className="size-4 text-primary" />
-            </div>
-            Generated in ~4s
-          </div>
+        <div className="fade-up-2 flex justify-center lg:justify-end">
+          <PhoneMockup />
         </div>
       </div>
     </section>
   );
 }
 
-function HeroImg({ src, tag, tall }: { src: string; tag: string; tall?: boolean }) {
+function PhoneMockup() {
   return (
-    <div className={`relative rounded-3xl overflow-hidden border border-border bg-card shadow-sm ${tall ? "aspect-[3/4]" : "aspect-square"}`}>
-      <img src={src} alt={tag} className="absolute inset-0 w-full h-full object-cover" />
-      <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide bg-card/95 backdrop-blur px-2.5 py-1 rounded-full shadow-sm">{tag}</span>
+    <div className="relative w-[292px] rounded-[46px] border border-border bg-foreground p-2.5 shadow-[var(--shadow-lift)] sm:w-[320px]">
+      <div className="relative overflow-hidden rounded-[38px] bg-card">
+        <div className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-foreground" />
+        <div className="relative">
+          <img src={demoPerson} alt="Before try-on" className="aspect-[3/4] w-full object-cover" loading="eager" />
+          <span className="absolute left-3 top-3 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold shadow-sm">Before</span>
+        </div>
+        <div className="relative">
+          <div className="absolute left-1/2 top-0 z-10 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-border bg-card shadow-md">
+            <ArrowDown className="size-5 text-primary" />
+          </div>
+          <img src={demoResult} alt="After AI try-on result" className="aspect-[3/4] w-full object-cover" loading="lazy" />
+          <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">After</span>
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ---------- MARQUEE ---------- */
-function Marquee() {
-  const items = ["Photoreal", "HD 2048px", "Face-preserving", "Any garment", "Shopify-ready", "Private by default", "4-second AI"];
-  return (
-    <section className="border-y border-border bg-card/40">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6 overflow-hidden">
-        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-semibold text-muted-foreground">
-          {items.map((t, i) => (
-            <span key={t} className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-primary/60" />
-              {t}
-              {i < items.length - 1 && <span className="hidden sm:inline text-border">·</span>}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+/* ── Section 3 · Upload card + workflow ────────────── */
+function UploadSection() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+  const [name, setName] = useState<string | null>(null);
 
-/* ---------- FEATURES ---------- */
-function Features() {
-  const cards = [
-    { title: "AI Try-On", desc: "Upload your photo and any outfit — get photoreal results in seconds.", Icon: Sparkles },
-    { title: "Outfit Editor", desc: "Describe changes in text and watch your look transform instantly.", Icon: Wand2 },
-    { title: "HD Downloads", desc: "Export 2048px images ready for social, ads, or lookbooks.", Icon: Download },
-    { title: "Private by Default", desc: "Your photos stay yours. Encrypted and never sold.", Icon: Shield },
-    { title: "Instant Results", desc: "Optimized AI pipeline delivers try-ons in under 10 seconds.", Icon: Zap },
-    { title: "Shopify-ready", desc: "Import store catalogs and let shoppers try before they buy.", Icon: Crown },
+  const flow = [
+    { icon: UserRound, label: "Upload Photo" },
+    { icon: Shirt, label: "Upload Outfit" },
+    { icon: Wand2, label: "Generate" },
+    { icon: Download, label: "Download" },
   ];
+
   return (
-    <section id="features" className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="max-w-2xl">
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">Features</div>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Everything you need to try before you buy.</h2>
-          <p className="mt-4 text-muted-foreground text-base md:text-lg leading-relaxed">
-            Built for shoppers, creators, and Shopify storefronts who want realistic previews without a studio.
-          </p>
-        </div>
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-          {cards.map(({ title, desc, Icon }) => (
-            <div key={title} className="group rounded-3xl border border-border bg-card p-7 hover:shadow-xl hover:-translate-y-0.5 hover:border-primary/30 transition">
-              <div className="size-12 rounded-2xl bg-primary-soft grid place-items-center group-hover:scale-105 transition">
-                <Icon className="size-5 text-primary" />
+    <section id="upload" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-8 sm:px-8">
+      <div className="grid gap-8 rounded-[24px] border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+        <label
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => { e.preventDefault(); setDragging(false); setName(e.dataTransfer.files?.[0]?.name ?? null); }}
+          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed px-6 py-12 text-center transition-colors ${
+            dragging ? "border-primary bg-primary-soft" : "border-border bg-secondary/50 hover:border-primary"
+          }`}
+        >
+          <UploadCloud className="size-9 text-primary" />
+          <h2 className="mt-2 text-lg font-bold">Upload Your Photo</h2>
+          <p className="text-sm text-muted-foreground">{name ?? "Drag & drop your image here"}</p>
+          <span className="my-1 text-xs text-muted-foreground">OR</span>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold hover-lift"
+          >
+            <ImagePlus className="size-4 text-primary" /> Choose Photo
+          </span>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={(e) => setName(e.target.files?.[0]?.name ?? null)}
+          />
+        </label>
+
+        <ol className="flex flex-wrap items-start justify-center gap-x-2 gap-y-6 sm:gap-x-4">
+          {flow.map((s, i) => (
+            <li key={s.label} className="flex items-center gap-2 sm:gap-4">
+              <div className="flex w-[86px] flex-col items-center gap-2.5 text-center">
+                <span className="grid size-14 place-items-center rounded-full bg-primary-soft">
+                  <s.icon className="size-6 text-primary" />
+                </span>
+                <span className="text-[13px] font-semibold leading-tight">{s.label}</span>
               </div>
-              <h3 className="mt-5 text-lg font-bold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{desc}</p>
-            </div>
+              {i < flow.length - 1 && <span aria-hidden className="mt-[-18px] text-border">›</span>}
+            </li>
           ))}
-        </div>
+        </ol>
+      </div>
+
+      <div className="mt-6 text-center">
+        <Link to="/app" className="btn-glow inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-[15px] font-semibold text-primary-foreground">
+          Start your try-on
+        </Link>
       </div>
     </section>
   );
 }
 
-/* ---------- HOW ---------- */
-function HowItWorks() {
+/* ── Section 4 · 3 Easy Steps ──────────────────────── */
+function Steps() {
   const steps = [
-    { Icon: Camera, title: "Upload your photo", desc: "A clear full-body photo works best." },
-    { Icon: ShirtIcon, title: "Pick an outfit", desc: "Upload any garment image from your device." },
-    { Icon: Sparkles, title: "Generate", desc: "Our AI fits the outfit on you in seconds." },
-    { Icon: Download, title: "Save & share", desc: "Download HD or share with friends." },
+    { icon: UserRound, title: "Upload Photo", text: "Add a clear full-body photo of yourself." },
+    { icon: Shirt, title: "Upload Outfit", text: "Drop in any outfit you want to try on." },
+    { icon: Wand2, title: "Generate", text: "AI creates a realistic try-on in seconds." },
   ];
   return (
-    <section id="how" className="py-24 md:py-32 bg-card/40 border-y border-border">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">How it works</div>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">4 steps to your new look.</h2>
+    <section id="how" className="mx-auto max-w-6xl scroll-mt-24 px-5 py-24 sm:px-8">
+      <SectionHeading title="3 Easy Steps" subtitle="No tutorials. No settings. Just three taps." />
+      <div className="mt-14 grid gap-6 sm:grid-cols-3">
+        {steps.map((s, i) => (
+          <article key={s.title} className="hover-lift relative rounded-[24px] border border-border bg-card p-8 text-center shadow-[var(--shadow-soft)]">
+            <span className="absolute left-6 top-6 grid size-7 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              {i + 1}
+            </span>
+            <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-primary-soft">
+              <s.icon className="size-7 text-primary" />
+            </span>
+            <h3 className="mt-6 text-lg font-bold">{s.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Section 5 · Before/After slider ───────────────── */
+function Comparison() {
+  const [pos, setPos] = useState(50);
+  return (
+    <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
+      <SectionHeading title="Realistic AI results" subtitle="Drag the slider to compare before and after." />
+      <div className="relative mt-12 select-none overflow-hidden rounded-[24px] border border-border shadow-[var(--shadow-lift)]">
+        <img src={demoResult} alt="After AI try-on" className="aspect-[16/10] w-full object-cover" loading="lazy" />
+        <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+          <img src={demoPerson} alt="Before try-on" className="aspect-[16/10] h-full w-full object-cover" style={{ width: `${(100 / pos) * 100}%`, maxWidth: "none" }} loading="lazy" />
         </div>
-        <div className="mt-14 grid sm:grid-cols-2 md:grid-cols-4 gap-5">
-          {steps.map(({ Icon, title, desc }, i) => (
-            <div key={title} className="relative rounded-3xl bg-card border border-border p-6">
-              <div className="absolute -top-3 left-6 h-7 px-3 rounded-full bg-primary text-primary-foreground text-[11px] font-bold flex items-center">
-                Step {i + 1}
-              </div>
-              <div className="mt-4 size-12 rounded-2xl bg-primary-soft grid place-items-center">
-                <Icon className="size-5 text-primary" />
-              </div>
-              <h3 className="mt-4 font-bold">{title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{desc}</p>
+        <span className="absolute left-4 top-4 rounded-full bg-card/95 px-3 py-1 text-xs font-semibold shadow-sm">Before</span>
+        <span className="absolute right-4 top-4 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-sm">After</span>
+        <div aria-hidden className="pointer-events-none absolute inset-y-0 w-0.5 bg-card" style={{ left: `${pos}%` }}>
+          <span className="absolute top-1/2 grid size-10 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-card text-xs font-bold shadow-md">‹ ›</span>
+        </div>
+        <input
+          type="range"
+          min={2}
+          max={98}
+          value={pos}
+          aria-label="Compare before and after"
+          onChange={(e) => setPos(Number(e.target.value))}
+          className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
+        />
+      </div>
+    </section>
+  );
+}
+
+/* ── Section 6 · Benefits ──────────────────────────── */
+function Benefits() {
+  const items = [
+    { icon: ScanFace, title: "Looks Like You", text: "Keeps your face, body & pose." },
+    { icon: Sparkles, title: "HD Quality", text: "High resolution, realistic detail." },
+    { icon: Zap, title: "Fast Generation", text: "Results in under 10 seconds." },
+    { icon: Lock, title: "Private & Secure", text: "Your photos are never shared." },
+    { icon: Check, title: "No Signup", text: "Start instantly, no account." },
+  ];
+  return (
+    <section className="border-y border-border bg-card/60">
+      <div className="mx-auto max-w-6xl px-5 py-24 sm:px-8">
+        <SectionHeading title="Why TryOnix?" subtitle="Everything you need. Nothing you don't." />
+        <div className="mt-14 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+          {items.map((b) => (
+            <div key={b.title} className="hover-lift rounded-[20px] border border-border bg-card p-6 text-center shadow-[var(--shadow-soft)]">
+              <b.icon className="mx-auto size-6 text-primary" />
+              <h3 className="mt-4 text-[15px] font-bold">{b.title}</h3>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{b.text}</p>
             </div>
           ))}
-        </div>
-        <div className="mt-12 text-center">
-          <Link to="/app" className="inline-flex h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold items-center gap-2 shadow-[0_10px_30px_-10px_oklch(0.52_0.16_152/0.6)]">
-            Try it now — free <ArrowRight className="size-4" />
-          </Link>
         </div>
       </div>
     </section>
   );
 }
 
-function ShirtIcon(props: React.SVGProps<SVGSVGElement>) {
+/* ── Section 7 · Pricing ───────────────────────────── */
+function Pricing() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" />
-    </svg>
-  );
-}
-
-/* ---------- DEMO ---------- */
-function DemoShowcase() {
-  return (
-    <section className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">Live demo</div>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Realistic try-ons — not model swaps.</h2>
-          <p className="mt-4 text-muted-foreground text-base md:text-lg leading-relaxed">
-            TryOnix preserves your face, body shape, and pose. The AI adapts the outfit to
-            you — not the other way around.
-          </p>
-          <ul className="mt-6 space-y-3 text-sm">
-            {["Preserves identity & pose", "Handles complex fabrics & prints", "Studio-grade lighting match"].map(x => (
-              <li key={x} className="flex items-center gap-2"><Check className="size-4 text-primary" /> {x}</li>
+    <section id="pricing" className="mx-auto max-w-4xl scroll-mt-24 px-5 py-24 sm:px-8">
+      <SectionHeading title="Simple Pricing" subtitle="Start free. Upgrade only if you love it." />
+      <div className="mt-14 grid gap-6 md:grid-cols-2">
+        <div className="hover-lift rounded-[24px] border border-border bg-card p-8 shadow-[var(--shadow-soft)]">
+          <h3 className="text-lg font-bold">Free</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Try it out</p>
+          <p className="mt-6 text-5xl font-extrabold tracking-tight">$0</p>
+          <ul className="mt-7 space-y-3 text-sm">
+            {["3 generations", "Standard quality"].map((f) => (
+              <li key={f} className="flex items-center gap-2.5">
+                <Check className="size-4 text-primary" /> {f}
+              </li>
             ))}
           </ul>
-          <Link to="/app" className="mt-8 inline-flex h-12 px-6 rounded-full bg-primary text-primary-foreground font-semibold items-center gap-2">
-            Try it free <ArrowRight className="size-4" />
+          <Link to="/app" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
+            Start Free
           </Link>
         </div>
-        <div className="rounded-3xl border border-border overflow-hidden bg-card shadow-xl">
-          <img src={demoResult} alt="Try-on preview" className="w-full aspect-[4/5] object-cover" />
+
+        <div className="hover-lift relative rounded-[24px] bg-primary p-8 text-primary-foreground shadow-[var(--shadow-lift)]">
+          <span className="absolute right-6 top-7 rounded-full bg-primary-foreground/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wide">
+            Popular
+          </span>
+          <h3 className="text-lg font-bold">Pro</h3>
+          <p className="mt-1 text-sm opacity-80">Unlimited everything</p>
+          <p className="mt-6 text-5xl font-extrabold tracking-tight">
+            $9<span className="text-base font-semibold opacity-80"> /month</span>
+          </p>
+          <ul className="mt-7 space-y-3 text-sm">
+            {["Unlimited generations", "HD quality", "Priority queue", "No watermark"].map((f) => (
+              <li key={f} className="flex items-center gap-2.5">
+                <Check className="size-4" /> {f}
+              </li>
+            ))}
+          </ul>
+          <Link to="/settings" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
+            Start Pro
+          </Link>
         </div>
       </div>
     </section>
   );
 }
 
-/* ---------- PRICING ---------- */
-function Pricing() {
-  const plans = [
-    { name: "Free", price: "$0", tag: "Start exploring", features: ["3 try-ons — no sign-up", "Standard resolution", "Watermark-free"], cta: "Try now", to: "/app", highlight: false },
-    { name: "Pro", price: "$12", period: "/mo", tag: "For creators", features: ["100 try-ons / month", "HD 2048px downloads", "Priority AI queue", "History gallery"], cta: "Start Pro", to: "/auth", highlight: true },
-    { name: "Studio", price: "$49", period: "/mo", tag: "For stores", features: ["Unlimited try-ons", "Shopify catalog import", "API access", "Team seats"], cta: "Contact sales", to: "/contact", highlight: false },
-  ] as const;
-  return (
-    <section id="pricing" className="py-24 md:py-32 bg-card/40 border-y border-border">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">Pricing</div>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">Simple plans. Scale as you go.</h2>
-        </div>
-        <div className="mt-14 grid md:grid-cols-3 gap-5">
-          {plans.map((p) => (
-            <div key={p.name} className={`rounded-3xl p-8 border ${p.highlight ? "bg-primary text-primary-foreground border-primary shadow-2xl md:-translate-y-2" : "bg-card border-border"}`}>
-              <div className="flex items-center justify-between">
-                <div className="font-bold text-lg">{p.name}</div>
-                {p.highlight && <span className="text-[10px] font-bold bg-primary-foreground text-primary px-2.5 py-1 rounded-full uppercase tracking-wider">Popular</span>}
-              </div>
-              <div className={`text-xs mt-1 ${p.highlight ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{p.tag}</div>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight">{p.price}</span>
-                {"period" in p && p.period && <span className={`text-sm ${p.highlight ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{p.period}</span>}
-              </div>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {p.features.map(f => (
-                  <li key={f} className="flex items-center gap-2">
-                    <Check className={`size-4 ${p.highlight ? "text-primary-foreground" : "text-primary"}`} /> {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to={p.to}
-                className={`mt-8 h-12 rounded-full inline-flex w-full items-center justify-center font-semibold ${p.highlight ? "bg-primary-foreground text-primary" : "bg-primary text-primary-foreground"}`}
-              >
-                {p.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- TESTIMONIALS ---------- */
-function Testimonials() {
-  const reviews = [
-    { name: "Aarav S.", role: "Shopper", text: "I stopped returning clothes. TryOnix shows me exactly how it fits before I checkout." },
-    { name: "Maya R.", role: "Content creator", text: "I generate 20+ looks a day for reels. The HD quality is unreal." },
-    { name: "Dev K.", role: "Shopify store owner", text: "Conversions up 22% after adding TryOnix on product pages." },
+/* ── Section 8 · FAQ ───────────────────────────────── */
+function Faq() {
+  const faqs = [
+    { q: "How does it work?", a: "Upload a photo of yourself and a photo of any outfit. Our AI renders you wearing it, keeping your face, body and pose intact." },
+    { q: "Is my data safe?", a: "Yes. Your photos are used only to generate your result and are never shared or sold. You can delete results anytime." },
+    { q: "How long does it take?", a: "Most try-ons finish in under 10 seconds. Pro accounts use a priority queue for the fastest results." },
+    { q: "Can I download images?", a: "Absolutely. Every result can be downloaded — Pro downloads are HD and watermark-free." },
+    { q: "What clothes work best?", a: "Clear, front-facing product photos on a plain background give the most realistic results — tops, dresses, jackets and full outfits all work." },
   ];
   return (
-    <section id="reviews" className="py-24 md:py-32">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <div className="text-xs font-bold uppercase tracking-widest text-primary">Loved by users</div>
-          <h2 className="mt-3 text-3xl md:text-5xl font-bold tracking-tight">People are seeing themselves differently.</h2>
-        </div>
-        <div className="mt-14 grid md:grid-cols-3 gap-5">
-          {reviews.map(r => (
-            <div key={r.name} className="rounded-3xl border border-border bg-card p-7 hover:shadow-lg transition">
-              <div className="flex gap-0.5 text-primary">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-4 fill-primary" />)}
-              </div>
-              <p className="mt-4 text-sm leading-relaxed">"{r.text}"</p>
-              <div className="mt-5 flex items-center gap-3">
-                <div className="size-9 rounded-full bg-primary-soft grid place-items-center text-primary font-bold text-sm">
-                  {r.name.charAt(0)}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">{r.name}</div>
-                  <div className="text-xs text-muted-foreground">{r.role}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+    <section id="faq" className="mx-auto max-w-3xl scroll-mt-24 px-5 pb-28 sm:px-8">
+      <SectionHeading title="Frequently Asked Questions" />
+      <div className="mt-12 divide-y divide-border overflow-hidden rounded-[24px] border border-border bg-card shadow-[var(--shadow-soft)]">
+        {faqs.map((f) => (
+          <details key={f.q} className="group px-6">
+            <summary className="flex cursor-pointer list-none items-center justify-between py-5 text-[15px] font-semibold">
+              {f.q}
+              <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+            </summary>
+            <p className="pb-5 pr-8 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+          </details>
+        ))}
       </div>
     </section>
   );
 }
 
-/* ---------- FINAL CTA ---------- */
-function FinalCTA() {
-  return (
-    <section className="py-24 md:py-32">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8">
-        <div className="rounded-[2.5rem] bg-primary text-primary-foreground p-10 md:p-16 text-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_20%,white_0%,transparent_40%),radial-gradient(circle_at_70%_80%,white_0%,transparent_40%)]" />
-          <div className="relative">
-            <div className="size-16 mx-auto rounded-full bg-primary-foreground/15 grid place-items-center">
-              <Crown className="size-7" />
-            </div>
-            <h2 className="mt-6 text-3xl md:text-5xl font-bold tracking-tight">Ready to try yourself on?</h2>
-            <p className="mt-4 text-primary-foreground/80 max-w-xl mx-auto">
-              Jump in — 3 free previews, no sign-up required.
-            </p>
-            <Link
-              to="/app"
-              className="mt-8 inline-flex h-14 px-8 rounded-full bg-primary-foreground text-primary font-semibold items-center gap-2 shadow-xl hover:scale-[1.02] transition"
-            >
-              Start Free <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- FOOTER ---------- */
+/* ── Section 9 · Footer ────────────────────────────── */
 function Footer() {
   return (
-    <footer className="border-t border-border bg-card/40">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-14 grid md:grid-cols-4 gap-8">
+    <footer className="border-t border-border bg-card/60">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2.5">
-            <img src={mascot} alt="TryOnix" className="size-9 rounded-full object-cover ring-1 ring-border" />
-            <span className="font-bold text-lg">TryOnix</span>
+            <img src={mascot} alt="" className="size-8 rounded-xl object-cover" />
+            <span className="text-[17px] font-bold tracking-tight">TryOnix</span>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground max-w-xs leading-relaxed">
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
             AI virtual try-on for shoppers, creators, and modern storefronts.
           </p>
-          <div className="mt-5 flex gap-3">
-            {[Twitter, Instagram, Github].map((Icon, i) => (
-              <a key={i} href="#" className="size-9 rounded-full border border-border grid place-items-center text-muted-foreground hover:text-foreground hover:bg-card transition">
+        </div>
+
+        <nav className="text-sm">
+          <h2 className="font-semibold">Company</h2>
+          <ul className="mt-4 space-y-2.5 text-muted-foreground">
+            <li><Link to="/privacy" className="hover:text-foreground">Privacy</Link></li>
+            <li><Link to="/terms" className="hover:text-foreground">Terms</Link></li>
+            <li><Link to="/contact" className="hover:text-foreground">Contact</Link></li>
+          </ul>
+        </nav>
+
+        <div className="text-sm">
+          <h2 className="font-semibold">Follow us</h2>
+          <div className="mt-4 flex items-center gap-3">
+            {[
+              { Icon: Twitter, label: "Twitter", href: "https://twitter.com" },
+              { Icon: Instagram, label: "Instagram", href: "https://instagram.com" },
+              { Icon: MessageCircle, label: "Discord", href: "https://discord.com" },
+            ].map(({ Icon, label, href }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="grid size-10 place-items-center rounded-full border border-border bg-card text-muted-foreground transition-colors hover:text-primary"
+              >
                 <Icon className="size-4" />
               </a>
             ))}
           </div>
         </div>
-        <FooterCol title="Product" links={[{ label: "Features", href: "#features" }, { label: "Pricing", href: "#pricing" }, { label: "How it works", href: "#how" }, { label: "Try free", href: "/app" }]} />
-        <FooterCol title="Company" links={[{ label: "About", href: "/about" }, { label: "Contact", href: "/contact" }, { label: "Sign in", href: "/auth" }]} />
-        <FooterCol title="Legal" links={[{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }]} />
       </div>
       <div className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <div>© {new Date().getFullYear()} TryOnix. All rights reserved.</div>
-          <div>Made with AI, for real people.</div>
-        </div>
+        <p className="mx-auto max-w-6xl px-5 py-6 text-xs text-muted-foreground sm:px-8">
+          © {new Date().getFullYear()} TryOnix. All rights reserved.
+        </p>
       </div>
     </footer>
   );
 }
 
-function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div>
-      <div className="text-sm font-bold">{title}</div>
-      <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-        {links.map(l => <li key={l.label}><a href={l.href} className="hover:text-foreground transition">{l.label}</a></li>)}
-      </ul>
+    <div className="text-center">
+      <h2 className="text-[clamp(1.75rem,3.6vw,2.5rem)] font-extrabold tracking-[-0.03em]">{title}</h2>
+      {subtitle && <p className="mx-auto mt-3 max-w-md text-[15px] text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
