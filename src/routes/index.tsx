@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ArrowDown, Check, ChevronDown, Download, ImagePlus, Lock, ScanFace,
+  ArrowDown, Check, ChevronDown, Download, Lock, Loader2, RefreshCw, ScanFace,
   Shirt, Sparkles, UploadCloud, UserRound, Wand2, Zap, Twitter, Instagram, MessageCircle,
 } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
