@@ -449,44 +449,47 @@ function Benefits() {
 function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-4xl scroll-mt-24 px-5 py-24 sm:px-8">
-      <SectionHeading title="Simple Pricing" subtitle="Start free. Upgrade only if you love it." />
+      <SectionHeading title="Simple Pricing" subtitle="First 3 try-ons free, no account. Create an account only when you go Premium." />
       <div className="mt-14 grid gap-6 md:grid-cols-2">
         <div className="hover-lift rounded-[24px] border border-border bg-card p-8 shadow-[var(--shadow-soft)]">
           <h3 className="text-lg font-bold">Free</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Try it out</p>
+          <p className="mt-1 text-sm text-muted-foreground">Try it out instantly</p>
           <p className="mt-6 text-5xl font-extrabold tracking-tight">$0</p>
           <ul className="mt-7 space-y-3 text-sm">
-            {["3 generations", "Standard quality"].map((f) => (
+            {["3 try-ons", "No sign-up needed", "Download your results"].map((f) => (
               <li key={f} className="flex items-center gap-2.5">
                 <Check className="size-4 text-primary" /> {f}
               </li>
             ))}
           </ul>
-          <Link to="/" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
+          <a href="#upload" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
             Start Free
-          </Link>
+          </a>
         </div>
 
         <div className="hover-lift relative rounded-[24px] bg-primary p-8 text-primary-foreground shadow-[var(--shadow-lift)]">
           <span className="absolute right-6 top-7 rounded-full bg-primary-foreground/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wide">
             Popular
           </span>
-          <h3 className="text-lg font-bold">Pro</h3>
-          <p className="mt-1 text-sm opacity-80">Unlimited everything</p>
+          <h3 className="text-lg font-bold">Premium</h3>
+          <p className="mt-1 text-sm opacity-80">85 try-ons every month</p>
           <p className="mt-6 text-5xl font-extrabold tracking-tight">
             $9<span className="text-base font-semibold opacity-80"> /month</span>
           </p>
           <ul className="mt-7 space-y-3 text-sm">
-            {["Unlimited generations", "HD quality", "Priority queue", "No watermark"].map((f) => (
+            {["85 try-ons per month", "No daily limit — use them any day", "HD downloads, no watermark", "Saved history of every result", "Priority generation queue"].map((f) => (
               <li key={f} className="flex items-center gap-2.5">
                 <Check className="size-4" /> {f}
               </li>
             ))}
           </ul>
-          <Link to="/settings" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
-            Start Pro
+          <Link to="/auth" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
+            Get Premium
           </Link>
+          <p className="mt-3 text-center text-[12px] opacity-80">Account (username + password) is created at checkout.</p>
         </div>
+      </div>
+
       </div>
     </section>
   );
