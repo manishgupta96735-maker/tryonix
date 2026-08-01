@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
 
 const navLinks = [
-  { to: "/app", label: "Try-On" },
+  { to: "/", label: "Try-On" },
   { to: "/history", label: "History" },
   { to: "/settings", label: "Settings" },
 ] as const;

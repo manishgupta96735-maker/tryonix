@@ -24,7 +24,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/app" });
+      if (data.user) navigate({ to: "/" });
     });
   }, [navigate]);
 
@@ -41,7 +41,7 @@ function AuthPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin + "/app" },
+        options: { emailRedirectTo: window.location.origin },
       });
       setLoading(false);
       if (error) return setErr(error.message);
@@ -52,14 +52,14 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setErr(error.message);
-    navigate({ to: "/app" });
+    navigate({ to: "/" });
   };
 
   const handleQuickSignIn = async () => {
     setErr(null);
     setOauthLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+      redirect_uri: window.location.origin,
     });
     if (result.error) {
       setOauthLoading(false);
@@ -67,7 +67,7 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app" });
+    navigate({ to: "/" });
   };
 
   return (

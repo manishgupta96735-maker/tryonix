@@ -71,7 +71,7 @@ function Navbar() {
           <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:block">
             Sign In
           </Link>
-          <Link to="/app" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
+          <Link to="/" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
             Start Free
           </Link>
           <button
@@ -462,7 +462,7 @@ function Pricing() {
               </li>
             ))}
           </ul>
-          <Link to="/app" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
+          <Link to="/" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
             Start Free
           </Link>
         </div>
