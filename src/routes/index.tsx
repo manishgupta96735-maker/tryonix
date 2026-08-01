@@ -354,7 +354,7 @@ function PickCard({
         )}
         <input ref={ref} type="file" accept="image/*" className="sr-only" onChange={(e) => read(e.target.files?.[0])} />
       </button>
-      <p className="mt-2 text-center text-sm font-semibold">{value ? `${label} ✓` : label}</p>
+      {value && <p className="mt-2 text-center text-sm font-semibold text-primary">{label} ✓</p>}
     </div>
   );
 }
