@@ -166,74 +166,199 @@ function PhoneMockup() {
   );
 }
 
-/* ── Section 3 · Upload card + workflow ────────────── */
-function UploadSection() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState(false);
-  const [name, setName] = useState<string | null>(null);
+/* ── Section 3 · Try-On Studio (inline, no separate page) ── */
+const GUEST_KEY = "tryonix_guest_credits_v1";
+const FREE_TRIES = 3;
 
-  const flow = [
-    { icon: UserRound, label: "Upload Photo" },
-    { icon: Shirt, label: "Upload Outfit" },
-    { icon: Wand2, label: "Generate" },
-    { icon: Download, label: "Download" },
-  ];
+function readGuestCredits() {
+  if (typeof window === "undefined") return FREE_TRIES;
+  const v = window.localStorage.getItem(GUEST_KEY);
+  if (v === null) {
+    window.localStorage.setItem(GUEST_KEY, String(FREE_TRIES));
+    return FREE_TRIES;
+  }
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(0, n) : FREE_TRIES;
+}
+
+function UploadSection() {
+  const [person, setPerson] = useState<string | null>(null);
+  const [outfit, setOutfit] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [credits, setCredits] = useState<number>(FREE_TRIES);
+
+  useEffect(() => { setCredits(readGuestCredits()); }, []);
+
+  const outOfCredits = credits <= 0;
+
+  const generate = async () => {
+    if (!person || !outfit || loading || outOfCredits) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await fetch("/api/tryon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personImage: person, clothImage: outfit }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed. Please try again.");
+      setResult(data.image);
+      const next = Math.max(0, credits - 1);
+      window.localStorage.setItem(GUEST_KEY, String(next));
+      setCredits(next);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <section id="upload" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-8 sm:px-8">
-      <div className="grid gap-8 rounded-[24px] border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-        <label
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => { e.preventDefault(); setDragging(false); setName(e.dataTransfer.files?.[0]?.name ?? null); }}
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed px-6 py-12 text-center transition-colors ${
-            dragging ? "border-primary bg-primary-soft" : "border-border bg-secondary/50 hover:border-primary"
-          }`}
-        >
-          <UploadCloud className="size-9 text-primary" />
-          <h2 className="mt-2 text-lg font-bold">Upload Your Photo</h2>
-          <p className="text-sm text-muted-foreground">{name ?? "Drag & drop your image here"}</p>
-          <span className="my-1 text-xs text-muted-foreground">OR</span>
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold hover-lift"
-          >
-            <ImagePlus className="size-4 text-primary" /> Choose Photo
+    <section id="upload" className="mx-auto max-w-5xl scroll-mt-24 px-5 pb-10 sm:px-8">
+      <div className="rounded-[24px] border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-bold tracking-tight">Try it right here</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3.5 py-1.5 text-[13px] font-semibold">
+            <Zap className="size-3.5 text-primary" />
+            {credits} free {credits === 1 ? "try-on" : "try-ons"} left
           </span>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={(e) => setName(e.target.files?.[0]?.name ?? null)}
-          />
-        </label>
+        </div>
 
-        <ol className="flex flex-wrap items-start justify-center gap-x-2 gap-y-6 sm:gap-x-4">
-          {flow.map((s, i) => (
-            <li key={s.label} className="flex items-center gap-2 sm:gap-4">
-              <div className="flex w-[86px] flex-col items-center gap-2.5 text-center">
-                <span className="grid size-14 place-items-center rounded-full bg-primary-soft">
-                  <s.icon className="size-6 text-primary" />
-                </span>
-                <span className="text-[13px] font-semibold leading-tight">{s.label}</span>
-              </div>
-              {i < flow.length - 1 && <span aria-hidden className="mt-[-18px] text-border">›</span>}
-            </li>
-          ))}
-        </ol>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <PickCard label="Upload Your Photo" hint="Clear full-body photo works best" icon={UserRound} value={person} onChange={setPerson} />
+          <PickCard label="Upload Your Outfit" hint="Any clothing product image" icon={Shirt} value={outfit} onChange={setOutfit} />
+        </div>
+
+        <button
+          type="button"
+          onClick={generate}
+          disabled={!person || !outfit || loading || outOfCredits}
+          className="btn-glow mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-primary py-4 text-base font-semibold text-primary-foreground disabled:opacity-40"
+        >
+          {loading ? <><Loader2 className="size-5 animate-spin" /> Creating your try-on…</> : <><Wand2 className="size-5" /> Start Your Try-On</>}
+        </button>
+
+        {!person || !outfit ? (
+          <p className="mt-3 text-center text-[13px] text-muted-foreground">
+            Add both photos to start — no sign-up needed for your first {FREE_TRIES}.
+          </p>
+        ) : null}
+
+        {outOfCredits && (
+          <div className="mt-5 rounded-[20px] border border-border bg-secondary/50 p-5 text-center">
+            <p className="text-[15px] font-bold">Your {FREE_TRIES} free try-ons are used</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Go Premium for $9/month — 85 try-ons every month, no daily limit. Use them all in one day if you want.
+            </p>
+            <a href="#pricing" className="btn-glow mt-4 inline-flex rounded-full bg-primary px-6 py-3 text-[15px] font-semibold text-primary-foreground">
+              Get Premium — $9/month
+            </a>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-5 rounded-[20px] border border-destructive/30 bg-destructive/5 p-5 text-center">
+            <p className="text-sm font-semibold text-destructive">{error}</p>
+            <button type="button" onClick={generate} className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold">
+              <RefreshCw className="size-4" /> Retry
+            </button>
+          </div>
+        )}
+
+        {(loading || result) && (
+          <div className="mt-7">
+            <h3 className="text-[15px] font-bold">Your result</h3>
+            <div className="relative mt-3 grid aspect-[4/5] max-h-[540px] w-full place-items-center overflow-hidden rounded-[20px] border border-border bg-secondary/50">
+              {loading && (
+                <div className="text-center">
+                  <Loader2 className="mx-auto size-8 animate-spin text-primary" />
+                  <p className="mt-3 text-sm text-muted-foreground">AI is fitting your outfit…</p>
+                </div>
+              )}
+              {result && !loading && <img src={result} alt="AI try-on result" className="size-full object-contain" />}
+            </div>
+            {result && !loading && (
+              <a
+                href={result}
+                download={`tryonix-${Date.now()}.png`}
+                className="mt-4 flex items-center justify-center gap-2 rounded-full border border-border bg-card py-3.5 text-[15px] font-semibold hover-lift"
+              >
+                <Download className="size-4 text-primary" /> Download Image
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="mt-6 text-center">
-        <Link to="/app" className="btn-glow inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-[15px] font-semibold text-primary-foreground">
-          Start your try-on
-        </Link>
-      </div>
+      <ol className="mt-8 flex flex-wrap items-start justify-center gap-x-2 gap-y-6 sm:gap-x-4">
+        {[
+          { icon: UserRound, label: "Upload Photo" },
+          { icon: Shirt, label: "Upload Outfit" },
+          { icon: Wand2, label: "Start Try-On" },
+          { icon: Download, label: "Download" },
+        ].map((s, i, arr) => (
+          <li key={s.label} className="flex items-center gap-2 sm:gap-4">
+            <div className="flex w-[86px] flex-col items-center gap-2.5 text-center">
+              <span className="grid size-14 place-items-center rounded-full bg-primary-soft">
+                <s.icon className="size-6 text-primary" />
+              </span>
+              <span className="text-[13px] font-semibold leading-tight">{s.label}</span>
+            </div>
+            {i < arr.length - 1 && <span aria-hidden className="mt-[-18px] text-border">›</span>}
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
+
+function PickCard({
+  label, hint, icon: Icon, value, onChange,
+}: {
+  label: string;
+  hint: string;
+  icon: typeof UserRound;
+  value: string | null;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const read = (file?: File) => {
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = () => onChange(r.result as string);
+    r.readAsDataURL(file);
+  };
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); read(e.dataTransfer.files?.[0]); }}
+        className="relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-[20px] border-2 border-dashed border-border bg-secondary/40 px-6 text-center transition-colors hover:border-primary"
+      >
+        {value ? (
+          <img src={value} alt={label} className="size-full object-cover" />
+        ) : (
+          <span className="block">
+            <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary-soft">
+              <Icon className="size-6 text-primary" />
+            </span>
+            <span className="mt-3 block text-[15px] font-bold">{label}</span>
+            <span className="mt-1 block text-[13px] text-muted-foreground">{hint}</span>
+          </span>
+        )}
+        <input ref={ref} type="file" accept="image/*" className="sr-only" onChange={(e) => read(e.target.files?.[0])} />
+      </button>
+      <p className="mt-2 text-center text-sm font-semibold">{value ? `${label} ✓` : label}</p>
+    </div>
+  );
+}
+
 
 /* ── Section 4 · 3 Easy Steps ──────────────────────── */
 function Steps() {
