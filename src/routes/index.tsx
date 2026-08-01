@@ -71,9 +71,9 @@ function Navbar() {
           <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:block">
             Sign In
           </Link>
-          <Link to="/" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
+          <a href="#upload" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
             Start Free
-          </Link>
+          </a>
           <button
             type="button"
             aria-label="Menu"
