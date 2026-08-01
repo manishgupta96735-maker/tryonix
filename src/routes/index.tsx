@@ -489,8 +489,6 @@ function Pricing() {
           <p className="mt-3 text-center text-[12px] opacity-80">Account (username + password) is created at checkout.</p>
         </div>
       </div>
-
-      </div>
     </section>
   );
 }
