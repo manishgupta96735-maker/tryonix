@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  ArrowDown, Check, ChevronDown, Download, ImagePlus, Lock, ScanFace,
+  ArrowDown, Check, ChevronDown, Download, Lock, Loader2, RefreshCw, ScanFace,
   Shirt, Sparkles, UploadCloud, UserRound, Wand2, Zap, Twitter, Instagram, MessageCircle,
 } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
@@ -71,9 +71,9 @@ function Navbar() {
           <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:block">
             Sign In
           </Link>
-          <Link to="/app" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
+          <a href="#upload" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
             Start Free
-          </Link>
+          </a>
           <button
             type="button"
             aria-label="Menu"
@@ -166,74 +166,199 @@ function PhoneMockup() {
   );
 }
 
-/* ── Section 3 · Upload card + workflow ────────────── */
-function UploadSection() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState(false);
-  const [name, setName] = useState<string | null>(null);
+/* ── Section 3 · Try-On Studio (inline, no separate page) ── */
+const GUEST_KEY = "tryonix_guest_credits_v1";
+const FREE_TRIES = 3;
 
-  const flow = [
-    { icon: UserRound, label: "Upload Photo" },
-    { icon: Shirt, label: "Upload Outfit" },
-    { icon: Wand2, label: "Generate" },
-    { icon: Download, label: "Download" },
-  ];
+function readGuestCredits() {
+  if (typeof window === "undefined") return FREE_TRIES;
+  const v = window.localStorage.getItem(GUEST_KEY);
+  if (v === null) {
+    window.localStorage.setItem(GUEST_KEY, String(FREE_TRIES));
+    return FREE_TRIES;
+  }
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(0, n) : FREE_TRIES;
+}
+
+function UploadSection() {
+  const [person, setPerson] = useState<string | null>(null);
+  const [outfit, setOutfit] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [credits, setCredits] = useState<number>(FREE_TRIES);
+
+  useEffect(() => { setCredits(readGuestCredits()); }, []);
+
+  const outOfCredits = credits <= 0;
+
+  const generate = async () => {
+    if (!person || !outfit || loading || outOfCredits) return;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const res = await fetch("/api/tryon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personImage: person, clothImage: outfit }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed. Please try again.");
+      setResult(data.image);
+      const next = Math.max(0, credits - 1);
+      window.localStorage.setItem(GUEST_KEY, String(next));
+      setCredits(next);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <section id="upload" className="mx-auto max-w-6xl scroll-mt-24 px-5 pb-8 sm:px-8">
-      <div className="grid gap-8 rounded-[24px] border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-        <label
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => { e.preventDefault(); setDragging(false); setName(e.dataTransfer.files?.[0]?.name ?? null); }}
-          className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed px-6 py-12 text-center transition-colors ${
-            dragging ? "border-primary bg-primary-soft" : "border-border bg-secondary/50 hover:border-primary"
-          }`}
-        >
-          <UploadCloud className="size-9 text-primary" />
-          <h2 className="mt-2 text-lg font-bold">Upload Your Photo</h2>
-          <p className="text-sm text-muted-foreground">{name ?? "Drag & drop your image here"}</p>
-          <span className="my-1 text-xs text-muted-foreground">OR</span>
-          <span
-            role="button"
-            tabIndex={0}
-            onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold hover-lift"
-          >
-            <ImagePlus className="size-4 text-primary" /> Choose Photo
+    <section id="upload" className="mx-auto max-w-5xl scroll-mt-24 px-5 pb-10 sm:px-8">
+      <div className="rounded-[24px] border border-border bg-card p-6 shadow-[var(--shadow-soft)] sm:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-bold tracking-tight">Try it right here</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/60 px-3.5 py-1.5 text-[13px] font-semibold">
+            <Zap className="size-3.5 text-primary" />
+            {credits} free {credits === 1 ? "try-on" : "try-ons"} left
           </span>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            onChange={(e) => setName(e.target.files?.[0]?.name ?? null)}
-          />
-        </label>
+        </div>
 
-        <ol className="flex flex-wrap items-start justify-center gap-x-2 gap-y-6 sm:gap-x-4">
-          {flow.map((s, i) => (
-            <li key={s.label} className="flex items-center gap-2 sm:gap-4">
-              <div className="flex w-[86px] flex-col items-center gap-2.5 text-center">
-                <span className="grid size-14 place-items-center rounded-full bg-primary-soft">
-                  <s.icon className="size-6 text-primary" />
-                </span>
-                <span className="text-[13px] font-semibold leading-tight">{s.label}</span>
-              </div>
-              {i < flow.length - 1 && <span aria-hidden className="mt-[-18px] text-border">›</span>}
-            </li>
-          ))}
-        </ol>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <PickCard label="Upload Your Photo" hint="Clear full-body photo works best" icon={UserRound} value={person} onChange={setPerson} />
+          <PickCard label="Upload Your Outfit" hint="Any clothing product image" icon={Shirt} value={outfit} onChange={setOutfit} />
+        </div>
+
+        <button
+          type="button"
+          onClick={generate}
+          disabled={!person || !outfit || loading || outOfCredits}
+          className="btn-glow mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-primary py-4 text-base font-semibold text-primary-foreground disabled:opacity-40"
+        >
+          {loading ? <><Loader2 className="size-5 animate-spin" /> Creating your try-on…</> : <><Wand2 className="size-5" /> Start Your Try-On</>}
+        </button>
+
+        {!person || !outfit ? (
+          <p className="mt-3 text-center text-[13px] text-muted-foreground">
+            Add both photos to start — no sign-up needed for your first {FREE_TRIES}.
+          </p>
+        ) : null}
+
+        {outOfCredits && (
+          <div className="mt-5 rounded-[20px] border border-border bg-secondary/50 p-5 text-center">
+            <p className="text-[15px] font-bold">Your {FREE_TRIES} free try-ons are used</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Go Premium for $9/month — 85 try-ons every month, no daily limit. Use them all in one day if you want.
+            </p>
+            <a href="#pricing" className="btn-glow mt-4 inline-flex rounded-full bg-primary px-6 py-3 text-[15px] font-semibold text-primary-foreground">
+              Get Premium — $9/month
+            </a>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-5 rounded-[20px] border border-destructive/30 bg-destructive/5 p-5 text-center">
+            <p className="text-sm font-semibold text-destructive">{error}</p>
+            <button type="button" onClick={generate} className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold">
+              <RefreshCw className="size-4" /> Retry
+            </button>
+          </div>
+        )}
+
+        {(loading || result) && (
+          <div className="mt-7">
+            <h3 className="text-[15px] font-bold">Your result</h3>
+            <div className="relative mt-3 grid aspect-[4/5] max-h-[540px] w-full place-items-center overflow-hidden rounded-[20px] border border-border bg-secondary/50">
+              {loading && (
+                <div className="text-center">
+                  <Loader2 className="mx-auto size-8 animate-spin text-primary" />
+                  <p className="mt-3 text-sm text-muted-foreground">AI is fitting your outfit…</p>
+                </div>
+              )}
+              {result && !loading && <img src={result} alt="AI try-on result" className="size-full object-contain" />}
+            </div>
+            {result && !loading && (
+              <a
+                href={result}
+                download={`tryonix-${Date.now()}.png`}
+                className="mt-4 flex items-center justify-center gap-2 rounded-full border border-border bg-card py-3.5 text-[15px] font-semibold hover-lift"
+              >
+                <Download className="size-4 text-primary" /> Download Image
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="mt-6 text-center">
-        <Link to="/app" className="btn-glow inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-[15px] font-semibold text-primary-foreground">
-          Start your try-on
-        </Link>
-      </div>
+      <ol className="mt-8 flex flex-wrap items-start justify-center gap-x-2 gap-y-6 sm:gap-x-4">
+        {[
+          { icon: UserRound, label: "Upload Photo" },
+          { icon: Shirt, label: "Upload Outfit" },
+          { icon: Wand2, label: "Start Try-On" },
+          { icon: Download, label: "Download" },
+        ].map((s, i, arr) => (
+          <li key={s.label} className="flex items-center gap-2 sm:gap-4">
+            <div className="flex w-[86px] flex-col items-center gap-2.5 text-center">
+              <span className="grid size-14 place-items-center rounded-full bg-primary-soft">
+                <s.icon className="size-6 text-primary" />
+              </span>
+              <span className="text-[13px] font-semibold leading-tight">{s.label}</span>
+            </div>
+            {i < arr.length - 1 && <span aria-hidden className="mt-[-18px] text-border">›</span>}
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
+
+function PickCard({
+  label, hint, icon: Icon, value, onChange,
+}: {
+  label: string;
+  hint: string;
+  icon: typeof UserRound;
+  value: string | null;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const read = (file?: File) => {
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = () => onChange(r.result as string);
+    r.readAsDataURL(file);
+  };
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => ref.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); read(e.dataTransfer.files?.[0]); }}
+        className="relative flex aspect-[5/4] w-full items-center justify-center overflow-hidden rounded-[20px] border-2 border-dashed border-border bg-secondary/40 px-6 text-center transition-colors hover:border-primary"
+      >
+        {value ? (
+          <img src={value} alt={label} className="size-full object-cover" />
+        ) : (
+          <span className="block">
+            <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary-soft">
+              <Icon className="size-6 text-primary" />
+            </span>
+            <span className="mt-3 block text-[15px] font-bold">{label}</span>
+            <span className="mt-1 block text-[13px] text-muted-foreground">{hint}</span>
+          </span>
+        )}
+        <input ref={ref} type="file" accept="image/*" className="sr-only" onChange={(e) => read(e.target.files?.[0])} />
+      </button>
+      {value && <p className="mt-2 text-center text-sm font-semibold text-primary">{label} ✓</p>}
+    </div>
+  );
+}
+
 
 /* ── Section 4 · 3 Easy Steps ──────────────────────── */
 function Steps() {
@@ -324,43 +449,44 @@ function Benefits() {
 function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-4xl scroll-mt-24 px-5 py-24 sm:px-8">
-      <SectionHeading title="Simple Pricing" subtitle="Start free. Upgrade only if you love it." />
+      <SectionHeading title="Simple Pricing" subtitle="First 3 try-ons free, no account. Create an account only when you go Premium." />
       <div className="mt-14 grid gap-6 md:grid-cols-2">
         <div className="hover-lift rounded-[24px] border border-border bg-card p-8 shadow-[var(--shadow-soft)]">
           <h3 className="text-lg font-bold">Free</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Try it out</p>
+          <p className="mt-1 text-sm text-muted-foreground">Try it out instantly</p>
           <p className="mt-6 text-5xl font-extrabold tracking-tight">$0</p>
           <ul className="mt-7 space-y-3 text-sm">
-            {["3 generations", "Standard quality"].map((f) => (
+            {["3 try-ons", "No sign-up needed", "Download your results"].map((f) => (
               <li key={f} className="flex items-center gap-2.5">
                 <Check className="size-4 text-primary" /> {f}
               </li>
             ))}
           </ul>
-          <Link to="/app" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
+          <a href="#upload" className="mt-8 block rounded-full border border-border py-3.5 text-center text-[15px] font-semibold transition-colors hover:bg-secondary">
             Start Free
-          </Link>
+          </a>
         </div>
 
         <div className="hover-lift relative rounded-[24px] bg-primary p-8 text-primary-foreground shadow-[var(--shadow-lift)]">
           <span className="absolute right-6 top-7 rounded-full bg-primary-foreground/20 px-3 py-1 text-[11px] font-bold uppercase tracking-wide">
             Popular
           </span>
-          <h3 className="text-lg font-bold">Pro</h3>
-          <p className="mt-1 text-sm opacity-80">Unlimited everything</p>
+          <h3 className="text-lg font-bold">Premium</h3>
+          <p className="mt-1 text-sm opacity-80">85 try-ons every month</p>
           <p className="mt-6 text-5xl font-extrabold tracking-tight">
             $9<span className="text-base font-semibold opacity-80"> /month</span>
           </p>
           <ul className="mt-7 space-y-3 text-sm">
-            {["Unlimited generations", "HD quality", "Priority queue", "No watermark"].map((f) => (
+            {["85 try-ons per month", "No daily limit — use them any day", "HD downloads, no watermark", "Saved history of every result", "Priority generation queue"].map((f) => (
               <li key={f} className="flex items-center gap-2.5">
                 <Check className="size-4" /> {f}
               </li>
             ))}
           </ul>
-          <Link to="/settings" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
-            Start Pro
+          <Link to="/auth" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
+            Get Premium
           </Link>
+          <p className="mt-3 text-center text-[12px] opacity-80">Account (username + password) is created at checkout.</p>
         </div>
       </div>
     </section>

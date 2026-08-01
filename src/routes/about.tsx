@@ -25,7 +25,7 @@ function AboutPage() {
             <img src={mascotAsset.url} alt="TryOnix" className="size-8 rounded-full" />
             <span>TryOnix</span>
           </Link>
-          <Link to="/app" className="text-sm rounded-full bg-primary text-primary-foreground px-4 py-2 font-semibold">Try free</Link>
+          <Link to="/" className="text-sm rounded-full bg-primary text-primary-foreground px-4 py-2 font-semibold">Try free</Link>
         </div>
       </header>
 
