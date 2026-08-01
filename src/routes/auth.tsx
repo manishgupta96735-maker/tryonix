@@ -1,26 +1,35 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import mascotAsset from "@/assets/mascot.png.asset.json";
-import { Loader2, ArrowLeft, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Loader2, ArrowLeft, User, Lock, Eye, EyeOff, Check } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Sign in — TryOnix" }] }),
+  head: () => ({
+    meta: [
+      { title: "Create your Premium account — TryOnix" },
+      { name: "description", content: "Create a TryOnix Premium account with a username and password to unlock 85 AI try-ons every month." },
+      { property: "og:title", content: "Create your TryOnix Premium account" },
+      { property: "og:description", content: "Username and password only. 85 try-ons every month, no daily limit." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: AuthPage,
 });
 
+const USERNAME_DOMAIN = "tryonix.app";
+const normalize = (u: string) => u.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
+  const [mode, setMode] = useState<"signup" | "signin">("signup");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -28,148 +37,124 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  const handleEmail = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(null);
-    setInfo(null);
-    if (!email || password.length < 6) {
-      setErr("Enter a valid email and a password of at least 6 characters.");
-      return;
-    }
+    const u = normalize(username);
+    if (u.length < 3) return setErr("Username must be at least 3 characters (letters, numbers, . _ -).");
+    if (password.length < 6) return setErr("Password must be at least 6 characters.");
+
     setLoading(true);
+    const email = `${u}@${USERNAME_DOMAIN}`;
     if (mode === "signup") {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: window.location.origin },
+        options: { data: { username: u } },
       });
       setLoading(false);
-      if (error) return setErr(error.message);
-      setInfo("Check your inbox to confirm your email, then sign in.");
-      setMode("signin");
+      if (error) {
+        return setErr(
+          /already registered|already exists/i.test(error.message)
+            ? "That username is taken. Try another one."
+            : error.message,
+        );
+      }
+      navigate({ to: "/" });
       return;
     }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) return setErr(error.message);
-    navigate({ to: "/" });
-  };
-
-  const handleQuickSignIn = async () => {
-    setErr(null);
-    setOauthLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      setOauthLoading(false);
-      setErr("Unable to sign in. Please try again.");
-      return;
-    }
-    if (result.redirected) return;
+    if (error) return setErr("Wrong username or password.");
     navigate({ to: "/" });
   };
 
   return (
-    <div className="min-h-screen bg-background flex justify-center">
-      <div className="w-full max-w-[440px] min-h-screen flex flex-col px-6 pt-6 pb-8">
-        <div className="flex items-center">
-          <Link to="/" className="size-10 rounded-full bg-card border border-border grid place-items-center">
-            <ArrowLeft className="size-4" />
-          </Link>
-        </div>
+    <div className="flex min-h-screen justify-center bg-background text-foreground">
+      <div className="flex w-full max-w-[440px] flex-col px-6 pb-10 pt-6">
+        <Link to="/" className="grid size-10 place-items-center rounded-full border border-border bg-card">
+          <ArrowLeft className="size-4" />
+        </Link>
 
-        <div className="flex-1 flex flex-col items-center text-center pt-6">
-          <div className="size-24 rounded-full bg-primary-soft grid place-items-center mb-5 overflow-hidden">
-            <img src={mascotAsset.url} alt="TryOnix" className="size-24 object-cover" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-primary">
-            {mode === "signin" ? "Welcome back" : "Create your account"}
+        <div className="flex flex-1 flex-col items-center pt-8 text-center">
+          <img src={mascotAsset.url} alt="TryOnix" className="size-20 rounded-2xl object-cover" />
+          <h1 className="mt-5 text-[26px] font-extrabold tracking-tight">
+            {mode === "signup" ? "Create your Premium account" : "Welcome back"}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground max-w-[300px]">
-            {mode === "signin"
-              ? "Sign in to continue your TryOnix journey."
-              : "Join TryOnix and start trying outfits in seconds."}
+          <p className="mt-2 max-w-[320px] text-sm text-muted-foreground">
+            {mode === "signup"
+              ? "Just a username and password — no email needed. Free try-ons never require an account."
+              : "Sign in with your username and password."}
           </p>
 
-          <button
-            onClick={handleQuickSignIn}
-            disabled={oauthLoading || loading}
-            className="mt-7 w-full h-14 rounded-full bg-card border border-border font-semibold inline-flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-50"
-          >
-            {oauthLoading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <span className="size-6 rounded-full bg-primary-soft grid place-items-center">
-                <Sparkles className="size-3.5 text-primary" />
-              </span>
-            )}
-            <span className="text-sm">Quick Sign-In</span>
-          </button>
+          {mode === "signup" && (
+            <ul className="mt-6 w-full space-y-2 rounded-[20px] border border-border bg-card p-5 text-left text-sm">
+              {["85 try-ons every month", "No daily limit", "HD downloads, no watermark", "Saved try-on history"].map((f) => (
+                <li key={f} className="flex items-center gap-2.5">
+                  <Check className="size-4 text-primary" /> {f}
+                </li>
+              ))}
+            </ul>
+          )}
 
-          <div className="my-5 flex items-center gap-3 w-full">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] text-muted-foreground uppercase tracking-wider">or with email</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleEmail} className="w-full space-y-3 text-left">
-            <div className="h-14 rounded-2xl border border-border bg-card flex items-center px-4">
-              <Mail className="size-4 text-muted-foreground mr-2" />
+          <form onSubmit={submit} className="mt-6 w-full space-y-3 text-left">
+            <div className="flex h-14 items-center rounded-2xl border border-border bg-card px-4">
+              <User className="mr-2 size-4 text-muted-foreground" />
               <input
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-base font-medium"
+                type="text"
+                autoComplete="username"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="flex-1 bg-transparent text-base font-medium outline-none"
               />
             </div>
-            <div className="h-14 rounded-2xl border border-border bg-card flex items-center px-4">
-              <Lock className="size-4 text-muted-foreground mr-2" />
+            <div className="flex h-14 items-center rounded-2xl border border-border bg-card px-4">
+              <Lock className="mr-2 size-4 text-muted-foreground" />
               <input
                 type={showPwd ? "text" : "password"}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-base font-medium"
+                className="flex-1 bg-transparent text-base font-medium outline-none"
               />
-              <button type="button" onClick={() => setShowPwd((v) => !v)} className="text-muted-foreground">
+              <button type="button" aria-label="Toggle password" onClick={() => setShowPwd((v) => !v)} className="text-muted-foreground">
                 {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
 
-            {err && <p className="text-sm text-destructive">{err}</p>}
-            {info && <p className="text-sm text-primary">{info}</p>}
+            {err && <p className="text-sm font-medium text-destructive">{err}</p>}
 
             <button
               type="submit"
-              disabled={loading || oauthLoading}
-              className="h-14 w-full rounded-full bg-primary text-primary-foreground font-semibold inline-flex items-center justify-center gap-2 shadow-[0_8px_24px_-8px_oklch(0.52_0.16_152/0.5)] active:scale-[0.98] transition disabled:opacity-50"
+              disabled={loading}
+              className="btn-glow inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-primary text-[15px] font-semibold text-primary-foreground disabled:opacity-50"
             >
-              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-              {mode === "signin" ? "Sign In" : "Create Account"}
+              {loading && <Loader2 className="size-4 animate-spin" />}
+              {mode === "signup" ? "Create account" : "Sign in"}
             </button>
           </form>
 
           <button
-            onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setErr(null); setInfo(null); }}
+            type="button"
+            onClick={() => { setMode(mode === "signup" ? "signin" : "signup"); setErr(null); }}
             className="mt-5 text-sm text-muted-foreground"
           >
-            {mode === "signin" ? (
-              <>New to TryOnix? <span className="text-primary font-semibold">Create account</span></>
+            {mode === "signup" ? (
+              <>Already have an account? <span className="font-semibold text-primary">Sign in</span></>
             ) : (
-              <>Already have an account? <span className="text-primary font-semibold">Sign in</span></>
+              <>Need Premium? <span className="font-semibold text-primary">Create account</span></>
             )}
           </button>
-        </div>
 
-        <p className="mt-6 text-center text-[11px] text-muted-foreground">
-          By continuing, you agree to TryOnix's <span className="text-primary underline">Terms</span> and <span className="text-primary underline">Privacy Policy</span>
-        </p>
+          <p className="mt-6 text-[12px] text-muted-foreground">
+            Payment isn’t enabled yet — accounts created now get Premium access at launch.
+          </p>
+        </div>
       </div>
     </div>
   );
 }
+
