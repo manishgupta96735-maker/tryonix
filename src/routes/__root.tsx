@@ -12,11 +12,13 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { NetworkStatus } from "../components/NetworkStatus";
+import mascotAsset from "../assets/mascot.png.asset.json";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <img src={mascotAsset.url} alt="TryOnix" className="mx-auto size-20 rounded-2xl object-cover" />
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -45,6 +47,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <img src={mascotAsset.url} alt="TryOnix" className="mx-auto mb-5 size-20 rounded-2xl object-cover" />
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
@@ -61,12 +64,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -80,16 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "TryOnix – See Clothes on Yourself Instantly" },
       { name: "description", content: "Upload your photo and virtually try outfits instantly using AI." },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "TryOnix" },
       { property: "og:title", content: "TryOnix – See Clothes on Yourself Instantly" },
       { property: "og:description", content: "Upload your photo and virtually try outfits instantly using AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "TryOnix – See Clothes on Yourself Instantly" },
       { name: "twitter:description", content: "Upload your photo and virtually try outfits instantly using AI." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8aab4230-03c8-4346-b7b6-e4cb3d5aa8da" },
       { name: "theme-color", content: "#22c55e" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
@@ -101,9 +101,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
-      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
-      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "1254x1254", href: mascotAsset.url },
+      { rel: "apple-touch-icon", href: mascotAsset.url },
     ],
   }),
   shellComponent: RootShell,

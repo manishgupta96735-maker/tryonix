@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { Link, createRouter, useRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import mascotAsset from "./assets/mascot.png.asset.json";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
@@ -9,6 +10,7 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-5 text-foreground">
       <div className="max-w-sm text-center">
+        <img src={mascotAsset.url} alt="TryOnix" className="mx-auto mb-5 size-20 rounded-2xl object-cover" />
         <h1 className="text-2xl font-bold text-primary">TryOnix couldn't load</h1>
         <p className="mt-3 text-sm text-muted-foreground">
           Please retry once. The app is protected from blank screens and will show this safe screen instead.

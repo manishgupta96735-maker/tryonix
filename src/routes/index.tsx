@@ -57,7 +57,7 @@ function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <img src={mascot} alt="" className="size-8 shrink-0 rounded-xl object-cover" />
+          <img src={mascot} alt="TryOnix" className="size-8 shrink-0 rounded-xl object-cover" />
           <span className="text-[19px] font-bold tracking-tight">TryOnix</span>
         </Link>
 
@@ -527,7 +527,7 @@ function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-2.5">
-            <img src={mascot} alt="" className="size-8 rounded-xl object-cover" />
+            <img src={mascot} alt="TryOnix" className="size-8 rounded-xl object-cover" />
             <span className="text-[17px] font-bold tracking-tight">TryOnix</span>
           </div>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">

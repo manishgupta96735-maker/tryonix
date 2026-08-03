@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import tryonixLogo from "@/assets/mascot.png.asset.json";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { Check, Crown, LogOut, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — TryOnix" }] }),
+  head: () => ({ meta: [
+    { title: "Account Settings — TryOnix" },
+    { name: "description", content: "Manage your TryOnix account, credits, and subscription plan." },
+    { property: "og:title", content: "Account Settings — TryOnix" },
+    { property: "og:description", content: "Manage your TryOnix account, credits, and subscription plan." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: SettingsPage,
 });
 
