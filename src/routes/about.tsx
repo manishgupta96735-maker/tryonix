@@ -11,6 +11,7 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About TryOnix" },
       { property: "og:description", content: "Our mission: make online fashion shopping confident and returns-free with AI try-on." },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AboutPage,

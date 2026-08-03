@@ -13,6 +13,7 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:title", content: "Privacy Policy — TryOnix" },
       { property: "og:description", content: "How TryOnix collects, uses, and protects your data." },
       { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "index, follow" },
     ],
   }),

@@ -13,6 +13,7 @@ export const Route = createFileRoute("/contact")({
       { property: "og:title", content: "Contact TryOnix" },
       { property: "og:description", content: "Get in touch with the TryOnix team." },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ContactPage,

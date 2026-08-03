@@ -12,6 +12,7 @@ export const Route = createFileRoute("/terms")({
       { property: "og:title", content: "Terms of Service — TryOnix" },
       { property: "og:description", content: "The terms that govern your use of TryOnix." },
       { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "index, follow" },
     ],
   }),

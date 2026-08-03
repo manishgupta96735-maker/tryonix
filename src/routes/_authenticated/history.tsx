@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import tryonixLogo from "@/assets/mascot.png.asset.json";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/BottomNav";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Trash2, Images, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/history")({
-  head: () => ({ meta: [{ title: "My History — TryOnix" }] }),
+  head: () => ({ meta: [
+    { title: "Try-On History — TryOnix" },
+    { name: "description", content: "View and download your saved TryOnix virtual try-on results." },
+    { property: "og:title", content: "Try-On History — TryOnix" },
+    { property: "og:description", content: "View and download your saved virtual try-on results." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: HistoryPage,
 });
 
