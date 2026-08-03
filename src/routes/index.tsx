@@ -88,11 +88,14 @@ function Navbar() {
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <div className="mx-auto flex max-w-6xl flex-col px-5 py-2">
-            {[...links, { href: "/auth", label: "Sign In" }].map((l) => (
+            {links.map((l) => (
               <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="py-3 text-[15px] text-muted-foreground">
                 {l.label}
               </a>
             ))}
+            <Link to="/auth" onClick={() => setOpen(false)} className="py-3 text-[15px] text-muted-foreground">
+              Sign In
+            </Link>
           </div>
         </div>
       )}
