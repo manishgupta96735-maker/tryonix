@@ -47,7 +47,7 @@ function SettingsPage() {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/auth";
+    window.location.href = "/";
   };
 
   return (
