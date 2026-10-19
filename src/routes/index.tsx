@@ -433,9 +433,9 @@ function Pricing() {
               </li>
             ))}
           </ul>
-          <Link to="/auth" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
-            Get Premium
-          </Link>
+          <a href="#upload" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
+            Try it free
+          </a>
           <p className="mt-3 text-center text-[12px] opacity-80">Account (username + password) is created at checkout.</p>
         </div>
       </div>
