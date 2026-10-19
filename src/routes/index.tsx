@@ -32,73 +32,23 @@ function LandingPage() {
     <div className="min-h-screen bg-background text-foreground antialiased">
       <Navbar />
       <main>
-        <Hero />
         <UploadSection />
-        <Steps />
-        <Comparison />
-        <Benefits />
-        <Pricing />
-        <Faq />
       </main>
-      <Footer />
     </div>
   );
 }
 
 /* ── Section 1 · Navbar ────────────────────────────── */
 function Navbar() {
-  const [open, setOpen] = useState(false);
-  const links = [
-    { href: "#how", label: "How It Works" },
-    { href: "#pricing", label: "Pricing" },
-    { href: "#faq", label: "FAQ" },
-  ];
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
           <img src={mascot} alt="TryOnix" className="size-8 shrink-0 rounded-xl object-cover" />
           <span className="text-[19px] font-bold tracking-tight">TryOnix</span>
         </Link>
-
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] text-muted-foreground md:flex">
-          {links.map((l) => (
-            <a key={l.href} href={l.href} className="transition-colors hover:text-foreground">{l.label}</a>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <Link to="/auth" className="hidden rounded-full px-4 py-2 text-[15px] font-medium text-muted-foreground transition-colors hover:text-foreground sm:block">
-            Sign In
-          </Link>
-          <a href="#upload" className="btn-glow rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-primary-foreground">
-            Start Free
-          </a>
-          <button
-            type="button"
-            aria-label="Menu"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-            className="rounded-full border border-border p-2 md:hidden"
-          >
-            <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} />
-          </button>
-        </div>
+        <span className="text-sm font-medium text-muted-foreground">3 free try-ons</span>
       </div>
-      {open && (
-        <div className="border-t border-border bg-background md:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col px-5 py-2">
-            {links.map((l) => (
-              <a key={l.label} href={l.href} onClick={() => setOpen(false)} className="py-3 text-[15px] text-muted-foreground">
-                {l.label}
-              </a>
-            ))}
-            <Link to="/auth" onClick={() => setOpen(false)} className="py-3 text-[15px] text-muted-foreground">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
@@ -255,11 +205,8 @@ function UploadSection() {
           <div className="mt-5 rounded-[20px] border border-border bg-secondary/50 p-5 text-center">
             <p className="text-[15px] font-bold">Your {FREE_TRIES} free try-ons are used</p>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Go Premium for $9/month — 85 try-ons every month, no daily limit. Use them all in one day if you want.
+              Free try-ons are used up. Premium plans are not available yet.
             </p>
-            <a href="#pricing" className="btn-glow mt-4 inline-flex rounded-full bg-primary px-6 py-3 text-[15px] font-semibold text-primary-foreground">
-              Get Premium — $9/month
-            </a>
           </div>
         )}
 
@@ -486,9 +433,9 @@ function Pricing() {
               </li>
             ))}
           </ul>
-          <Link to="/auth" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
-            Get Premium
-          </Link>
+          <a href="#upload" className="mt-8 block rounded-full bg-primary-foreground py-3.5 text-center text-[15px] font-semibold text-primary transition-transform hover:scale-[1.02]">
+            Try it free
+          </a>
           <p className="mt-3 text-center text-[12px] opacity-80">Account (username + password) is created at checkout.</p>
         </div>
       </div>
