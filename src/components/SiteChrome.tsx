@@ -12,17 +12,8 @@ const navigation = [
   { label: "FAQ", to: "/faq" as const },
 ];
 
-function readCredits() {
-  if (typeof window === "undefined") return 3;
-  const stored = window.localStorage.getItem(guestKey);
-  if (stored === null) return 3;
-  const count = Number(stored);
-  return Number.isFinite(count) ? Math.max(0, count) : 3;
-}
-
-export function SiteHeader() {
+export function useGuestCredits() {
   const [credits, setCredits] = useState(3);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const update = () => setCredits(readCredits());
@@ -34,6 +25,9 @@ export function SiteHeader() {
       window.removeEventListener("tryonix-credits-change", update);
     };
   }, []);
+
+  return credits;
+}
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">

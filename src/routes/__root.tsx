@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "TryOnix – See Clothes on Yourself Instantly" },
       { name: "twitter:description", content: "Upload your photo and virtually try outfits instantly using AI." },
-      { name: "theme-color", content: "#22c55e" },
+      { name: "theme-color", content: "#FF2D78" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "TryOnix" },
