@@ -130,3 +130,38 @@ export function PageIntro({ eyebrow, title, subtitle }: { eyebrow?: string; titl
     </div>
   );
 }
+
+export function TitleSparkle({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12 1.5c.7 5.5 4.9 9.7 10.5 10.5-5.5.7-9.7 4.9-10.5 10.5C11.3 17 7.1 12.8 1.5 12 7.1 11.2 11.3 7 12 1.5Z" />
+    </svg>
+  );
+}
+
+export function PlayfulBackdrop() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -left-14 -top-8 size-40 rounded-full bg-brand-lavender/25 sm:size-52" />
+      <div className="absolute -right-16 top-24 size-44 rounded-full bg-brand-peach/40 sm:size-56" />
+      <div className="absolute -left-10 bottom-10 size-36 rounded-full bg-brand-peach/35 sm:size-44" />
+      <div className="absolute -right-10 -bottom-12 size-40 rounded-full bg-brand-pink/10 sm:size-52" />
+      <div className="absolute left-[8%] top-40 hidden lg:block">
+        <svg viewBox="0 0 40 24" fill="none" className="size-10 text-[#ffc93c]" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <path d="M4 20C10 14 14 8 20 4M22 14c4-3 8-6 13-8" />
+        </svg>
+      </div>
+      <div className="absolute right-[7%] top-56 hidden lg:block">
+        <svg viewBox="0 0 40 24" fill="none" className="size-10 text-brand-coral" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <path d="M4 4c5 4 9 10 12 16M24 6c4 4 7 9 9 14" />
+        </svg>
+      </div>
+      <div className="absolute bottom-24 left-[5%] hidden lg:block">
+        <TitleSparkle className="size-8 text-brand-coral/70" />
+      </div>
+      <div className="absolute bottom-32 right-[6%] hidden lg:block">
+        <TitleSparkle className="size-6 text-brand-pink/60" />
+      </div>
+    </div>
+  );
+}
