@@ -29,6 +29,21 @@ export function useGuestCredits() {
   return credits;
 }
 
+function readCredits() {
+  try {
+    const raw = window.localStorage.getItem(guestKey);
+    if (raw === null) return 3;
+    const n = Number(raw);
+    return Number.isFinite(n) ? Math.max(0, n) : 3;
+  } catch {
+    return 3;
+  }
+}
+
+export function SiteHeader() {
+  const credits = useGuestCredits();
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
