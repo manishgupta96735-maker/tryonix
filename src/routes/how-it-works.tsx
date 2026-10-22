@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Shirt, UserRound } from "lucide-react";
-import { PublicPage } from "@/components/SiteChrome";
-import demoPerson from "@/assets/demo-person.jpg";
-import demoOutfit from "@/assets/demo-outfit.jpg";
-import demoResult from "@/assets/demo-result.jpg";
+import { ArrowRight } from "lucide-react";
+import { PlayfulBackdrop, PublicPage, TitleSparkle } from "@/components/SiteChrome";
+import resultTee from "@/assets/examples/result-tee.jpg";
+import outfitPinkHoodie from "@/assets/examples/outfit-pinkhoodie.jpg";
+import resultPinkHoodie from "@/assets/examples/result-pinkhoodie.jpg";
 
 export const Route = createFileRoute("/how-it-works")({
   ssr: false,
@@ -24,103 +24,74 @@ const STEPS = [
   {
     n: 1,
     badge: "bg-brand-pink",
-    img: demoPerson,
-    alt: "Step 1 example: a clear full-body photo",
+    card: "bg-brand-pink-soft/50",
+    img: resultTee,
+    alt: "Step 1 example: a clear photo of a person",
     title: "Upload Your Photo",
     text: "Use a clear full-body photo for best results.",
   },
   {
     n: 2,
-    badge: "bg-brand-lavender",
-    img: demoOutfit,
-    alt: "Step 2 example: an outfit product image",
+    badge: "bg-brand-blue",
+    card: "bg-card",
+    img: outfitPinkHoodie,
+    alt: "Step 2 example: a clothing product image",
     title: "Upload Your Outfit",
     text: "Any clothing product image works.",
   },
   {
     n: 3,
-    badge: "bg-brand-coral",
-    img: demoResult,
+    badge: "bg-brand-blue",
+    card: "bg-card",
+    img: resultPinkHoodie,
     alt: "Step 3 example: the AI try-on result",
     title: "Get Your Result",
     text: "See how you look in it instantly with AI.",
   },
 ];
 
-const TIPS = [
-  {
-    icon: UserRound,
-    title: "Use a clear photo",
-    text: "A well-lit, full-body photo where you're standing naturally gives the most realistic result.",
-  },
-  {
-    icon: Shirt,
-    title: "Pick good outfit images",
-    text: "Front-facing product photos on a plain background — like from a shop listing — work best.",
-  },
-  {
-    icon: Check,
-    title: "Supported formats",
-    text: "Common image formats like JPG, PNG, and WebP are all supported.",
-  },
-];
-
 function HowItWorksPage() {
   return (
     <PublicPage>
-      <section className="mx-auto max-w-6xl px-5 pb-16 pt-12 sm:px-6 sm:pt-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-brand-navy sm:text-5xl">
-            How <span className="text-gradient">It Works</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-            Get your virtual try-on in just 3 simple steps.
-          </p>
-        </div>
-
-        <div className="relative mt-14">
-          <ArrowRight aria-hidden className="absolute left-1/3 top-[26%] hidden -translate-x-1/2 size-8 text-brand-pink lg:block" />
-          <ArrowRight aria-hidden className="absolute left-2/3 top-[26%] hidden -translate-x-1/2 size-8 text-brand-pink lg:block" />
-          <div className="grid gap-8 sm:grid-cols-3">
-            {STEPS.map((step) => (
-              <article key={step.n} className="hover-lift relative rounded-[26px] border border-border bg-card p-5 text-center shadow-[var(--shadow-soft)]">
-                <span className={`absolute -top-3.5 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full ${step.badge} text-sm font-extrabold text-white shadow-md`}>
-                  {step.n}
-                </span>
-                <img src={step.img} alt={step.alt} className="aspect-[3/4] w-full rounded-2xl object-cover" loading="lazy" />
-                <h2 className="mt-5 text-lg font-extrabold text-brand-navy">{step.title}</h2>
-                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{step.text}</p>
-              </article>
-            ))}
+      <section className="relative overflow-hidden">
+        <PlayfulBackdrop />
+        <div className="relative mx-auto max-w-6xl px-5 pb-20 pt-12 sm:px-6 sm:pt-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight text-brand-navy sm:text-5xl">
+              How It <span className="text-brand-pink">Works</span>
+              <TitleSparkle className="ml-2 inline-block size-7 -translate-y-1 text-[#ffc93c] sm:size-8" />
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+              Get your virtual try-on in just 3 simple steps.
+            </p>
           </div>
-        </div>
 
-        <div className="mt-10 text-center">
-          <Link
-            to="/"
-            hash="upload"
-            className="brand-gradient inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand-pink/25 transition-transform hover:-translate-y-0.5"
-          >
-            Try It Now <span aria-hidden>→</span>
-          </Link>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-6">
-        <h2 className="text-center text-2xl font-extrabold text-brand-navy">Get the best results</h2>
-        <p className="mx-auto mt-3 max-w-xl text-center text-sm leading-6 text-muted-foreground">
-          A few small things make your try-ons look noticeably better.
-        </p>
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
-          {TIPS.map((tip) => (
-            <div key={tip.title} className="rounded-[22px] border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
-              <span className="grid size-11 place-items-center rounded-full bg-brand-pink-soft">
-                <tip.icon className="size-5 text-brand-pink" aria-hidden />
-              </span>
-              <h3 className="mt-4 text-[15px] font-bold text-brand-navy">{tip.title}</h3>
-              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{tip.text}</p>
+          <div className="relative mt-14">
+            <ArrowRight aria-hidden className="absolute left-1/3 top-[24%] hidden size-9 -translate-x-1/2 text-brand-navy lg:block" />
+            <ArrowRight aria-hidden className="absolute left-2/3 top-[24%] hidden size-9 -translate-x-1/2 text-brand-navy lg:block" />
+            <div className="grid gap-10 sm:grid-cols-3 sm:gap-6">
+              {STEPS.map((step) => (
+                <article key={step.n} className={`hover-lift relative rounded-[26px] border border-border p-4 pb-6 text-center shadow-[var(--shadow-soft)] ${step.card}`}>
+                  <span className={`absolute -top-4 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full text-sm font-extrabold text-white shadow-md ${step.badge}`}>
+                    {step.n}
+                  </span>
+                  <img src={step.img} alt={step.alt} width={1024} height={1024} loading="lazy" className="aspect-[3/4] w-full rounded-2xl object-cover" />
+                  <h2 className="mt-5 text-lg font-extrabold text-brand-navy">{step.title}</h2>
+                  <p className="mx-auto mt-1.5 max-w-[15rem] text-sm leading-6 text-muted-foreground">{step.text}</p>
+                </article>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link
+              to="/"
+              hash="upload"
+              className="brand-gradient inline-flex items-center gap-2.5 rounded-full px-10 py-4 text-[15px] font-bold text-white shadow-lg shadow-brand-pink/25 transition-transform hover:-translate-y-0.5"
+            >
+              Try It Now <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
         </div>
       </section>
     </PublicPage>
