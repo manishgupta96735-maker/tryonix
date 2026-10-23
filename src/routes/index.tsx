@@ -149,29 +149,32 @@ function UploadSection() {
 
   const generate = async () => {
     if (!person || !outfit || loading || outOfCredits) return;
+    // Optimistic lock: credit is held, not deducted, until a real image comes back.
     setLoading(true);
     setError(null);
+    setBusy(false);
     setInlineResult(null);
+    setStartedAt(Date.now());
+    const { runTryOn, AllServersBusyError } = await import("@/lib/tryon-engine");
     try {
-      const res = await fetch("/api/tryon", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personImage: person, clothImage: outfit }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed. Please try again.");
+      const image = await runTryOn(person, outfit, (u) => { setStep(u.step); setServer(u.server ?? null); });
+      // Commit on success.
       const next = Math.max(0, credits - 1);
       window.localStorage.setItem(GUEST_KEY, String(next));
+      window.dispatchEvent(new Event("tryonix-credits-change"));
       setCredits(next);
+      setStep("success");
       try {
-        await saveTryOnRecord({ result: data.image, person, outfit, createdAt: new Date().toISOString() });
+        await saveTryOnRecord({ result: image, person, outfit, createdAt: new Date().toISOString() });
         navigate({ to: "/result" });
       } catch {
-        // Storage unavailable — show the result here instead of losing it.
-        setInlineResult(data.image);
+        setInlineResult(image);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      // Rollback: nothing was deducted.
+      if (e instanceof AllServersBusyError) { setStep("server_busy"); setBusy(true); }
+      else { setStep("idle"); setError(e instanceof Error ? e.message : "Something went wrong."); }
+      toast.success("Credit restored.");
     } finally {
       setLoading(false);
     }
