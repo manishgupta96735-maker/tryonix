@@ -123,6 +123,10 @@ function UploadSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(FREE_TRIES);
+  const [step, setStep] = useState<TryOnStep>("idle");
+  const [server, setServer] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [startedAt, setStartedAt] = useState(0);
   const hydrated = useRef(false);
 
   useEffect(() => { setCredits(readGuestCredits()); }, []);
