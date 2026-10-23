@@ -6,6 +6,40 @@ import {
 } from "lucide-react";
 import { PublicPage } from "@/components/SiteChrome";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
+import { toast } from "sonner";
+import type { TryOnStep } from "@/lib/tryon-engine";
+
+const STATUS_TEXT: Record<TryOnStep, string> = {
+  idle: "", preparing_images: "Preparing your photos...", connecting: "Connecting to server...",
+  in_queue: "In queue...", processing: "Generating your virtual outfit...",
+  switching_server: "Switching to backup AI server...", success: "Done!", server_busy: "",
+};
+const STEP_ORDER: TryOnStep[] = ["preparing_images", "connecting", "in_queue", "processing", "success"];
+
+function StatusCard({ step, server, startedAt }: { step: TryOnStep; server: string | null; startedAt: number }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const secs = Math.max(0, Math.floor((now - startedAt) / 1000));
+  const idx = Math.max(0, STEP_ORDER.indexOf(step === "switching_server" ? "connecting" : step));
+  const pct = Math.round(((idx + 1) / STEP_ORDER.length) * 100);
+  return (
+    <div role="status" aria-live="polite" className="mt-5 rounded-[20px] border border-brand-pink/20 bg-brand-pink-soft/50 p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-[15px] font-bold text-brand-navy">
+          <Loader2 className="size-4 animate-spin text-brand-pink" /> {STATUS_TEXT[step] || "Starting..."}
+        </p>
+        <span className="font-mono text-[13px] text-muted-foreground">
+          {String(Math.floor(secs / 60)).padStart(2, "0")}:{String(secs % 60).padStart(2, "0")}
+        </span>
+      </div>
+      {server && <p className="mt-1 text-[12px] text-muted-foreground">{server}</p>}
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-card">
+        <div className="brand-gradient h-full rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="mt-2 text-[12px] text-muted-foreground">Free servers can take up to a minute. Your credit is only used if it works.</p>
+    </div>
+  );
+}
 import demoPerson from "@/assets/demo-person.jpg";
 import demoOutfit from "@/assets/demo-outfit.jpg";
 import demoResult from "@/assets/demo-result.jpg";
@@ -123,6 +157,10 @@ function UploadSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(FREE_TRIES);
+  const [step, setStep] = useState<TryOnStep>("idle");
+  const [server, setServer] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [startedAt, setStartedAt] = useState(0);
   const hydrated = useRef(false);
 
   useEffect(() => { setCredits(readGuestCredits()); }, []);
@@ -149,29 +187,32 @@ function UploadSection() {
 
   const generate = async () => {
     if (!person || !outfit || loading || outOfCredits) return;
+    // Optimistic lock: credit is held, not deducted, until a real image comes back.
     setLoading(true);
     setError(null);
+    setBusy(false);
     setInlineResult(null);
+    setStartedAt(Date.now());
+    const { runTryOn, AllServersBusyError } = await import("@/lib/tryon-engine");
     try {
-      const res = await fetch("/api/tryon", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personImage: person, clothImage: outfit }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed. Please try again.");
+      const image = await runTryOn(person, outfit, (u) => { setStep(u.step); setServer(u.server ?? null); });
+      // Commit on success.
       const next = Math.max(0, credits - 1);
       window.localStorage.setItem(GUEST_KEY, String(next));
+      window.dispatchEvent(new Event("tryonix-credits-change"));
       setCredits(next);
+      setStep("success");
       try {
-        await saveTryOnRecord({ result: data.image, person, outfit, createdAt: new Date().toISOString() });
+        await saveTryOnRecord({ result: image, person, outfit, createdAt: new Date().toISOString() });
         navigate({ to: "/result" });
       } catch {
-        // Storage unavailable — show the result here instead of losing it.
-        setInlineResult(data.image);
+        setInlineResult(image);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      // Rollback: nothing was deducted.
+      if (e instanceof AllServersBusyError) { setStep("server_busy"); setBusy(true); }
+      else { setStep("idle"); setError(e instanceof Error ? e.message : "Something went wrong."); }
+      toast.success("Credit restored.");
     } finally {
       setLoading(false);
     }
@@ -216,6 +257,18 @@ function UploadSection() {
             <p className="mt-1.5 text-sm text-muted-foreground">
               Free try-ons are used up. Premium plans are not available yet.
             </p>
+          </div>
+        )}
+
+        {loading && <StatusCard step={step} server={server} startedAt={startedAt} />}
+
+        {busy && !loading && (
+          <div role="alert" className="mt-5 rounded-[20px] border border-brand-pink/30 bg-card p-5 text-center">
+            <p className="text-[15px] font-bold text-brand-navy">All free AI servers are currently full.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">Your credit was not deducted! Try again in 2 minutes.</p>
+            <button type="button" onClick={generate} className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold">
+              <RefreshCw className="size-4" /> Try again
+            </button>
           </div>
         )}
 
