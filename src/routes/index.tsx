@@ -260,6 +260,18 @@ function UploadSection() {
           </div>
         )}
 
+        {loading && <StatusCard step={step} server={server} startedAt={startedAt} />}
+
+        {busy && !loading && (
+          <div role="alert" className="mt-5 rounded-[20px] border border-brand-pink/30 bg-card p-5 text-center">
+            <p className="text-[15px] font-bold text-brand-navy">All free AI servers are currently full.</p>
+            <p className="mt-1.5 text-sm text-muted-foreground">Your credit was not deducted! Try again in 2 minutes.</p>
+            <button type="button" onClick={generate} className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold">
+              <RefreshCw className="size-4" /> Try again
+            </button>
+          </div>
+        )}
+
         {error && (
           <div className="mt-5 rounded-[20px] border border-destructive/30 bg-destructive/5 p-5 text-center">
             <p className="text-sm font-semibold text-destructive">{error}</p>
