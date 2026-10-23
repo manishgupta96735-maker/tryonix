@@ -34,7 +34,7 @@ const SPACES: SpaceAdapter[] = [
         garment_des: "clothing item",
         is_checked: true,
         is_checked_crop: false,
-        denoise_steps: 30,
+        denoise_steps: 20,
         seed: 42,
       }),
   },
@@ -52,7 +52,7 @@ const SPACES: SpaceAdapter[] = [
         person_image: { background: person, layers: [], composite: null },
         cloth_image: outfit,
         cloth_type: "upper",
-        num_inference_steps: 50,
+        num_inference_steps: 20,
         guidance_scale: 2.5,
         seed: 42,
         show_type: "result only",
@@ -73,7 +73,7 @@ export async function prepareImage(dataUrl: string, maxSide = 1024): Promise<Blo
   canvas.width = Math.round(img.width * scale);
   canvas.height = Math.round(img.height * scale);
   canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-  return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", 0.9));
+  return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", 0.8));
 }
 
 function extractUrl(data: unknown): string | null {
