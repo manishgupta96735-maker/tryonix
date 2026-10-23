@@ -16,6 +16,14 @@ const STATUS_TEXT: Record<TryOnStep, string> = {
 };
 const STEP_ORDER: TryOnStep[] = ["preparing_images", "connecting", "in_queue", "processing", "success"];
 
+/** Smooth time-based progress copy shown while the timer runs. */
+function timerHint(secs: number): string {
+  if (secs <= 5) return "Compressing & uploading images...";
+  if (secs <= 15) return "AI mapping outfit to pose...";
+  if (secs <= 25) return "Enhancing fabric details & lighting...";
+  return "Almost done — final touches...";
+}
+
 function StatusCard({ step, server, startedAt }: { step: TryOnStep; server: string | null; startedAt: number }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
@@ -36,7 +44,8 @@ function StatusCard({ step, server, startedAt }: { step: TryOnStep; server: stri
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-card">
         <div className="brand-gradient h-full rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
-      <p className="mt-2 text-[12px] text-muted-foreground">Free servers can take up to a minute. Your credit is only used if it works.</p>
+      <p className="mt-2 text-[12px] text-muted-foreground">{timerHint(secs)}</p>
+      <p className="mt-1 text-[12px] text-muted-foreground">Free servers can take up to a minute. Your credit is only used if it works.</p>
     </div>
   );
 }
@@ -196,8 +205,10 @@ function UploadSection() {
     const { runTryOn, AllServersBusyError } = await import("@/lib/tryon-engine");
     try {
       const image = await runTryOn(person, outfit, (u) => { setStep(u.step); setServer(u.server ?? null); });
-      // Commit on success.
-      const next = Math.max(0, credits - 1);
+      // Commit on success — localStorage is the source of truth, read it fresh
+      // so the count can never go stale from state or another tab.
+      const current = readGuestCredits();
+      const next = Math.max(0, current - 1);
       window.localStorage.setItem(GUEST_KEY, String(next));
       window.dispatchEvent(new Event("tryonix-credits-change"));
       setCredits(next);
@@ -209,10 +220,15 @@ function UploadSection() {
         setInlineResult(image);
       }
     } catch (e) {
-      // Rollback: nothing was deducted.
-      if (e instanceof AllServersBusyError) { setStep("server_busy"); setBusy(true); }
-      else { setStep("idle"); setError(e instanceof Error ? e.message : "Something went wrong."); }
-      toast.success("Credit restored.");
+      // Rollback: nothing was deducted, so only the busy case gets a restore note.
+      if (e instanceof AllServersBusyError) {
+        setStep("server_busy");
+        setBusy(true);
+        toast.success("Credit restored.");
+      } else {
+        setStep("idle");
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
