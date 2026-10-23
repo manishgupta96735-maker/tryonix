@@ -6,6 +6,40 @@ import {
 } from "lucide-react";
 import { PublicPage } from "@/components/SiteChrome";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
+import { toast } from "sonner";
+import type { TryOnStep } from "@/lib/tryon-engine";
+
+const STATUS_TEXT: Record<TryOnStep, string> = {
+  idle: "", preparing_images: "Preparing your photos...", connecting: "Connecting to server...",
+  in_queue: "In queue...", processing: "Generating your virtual outfit...",
+  switching_server: "Switching to backup AI server...", success: "Done!", server_busy: "",
+};
+const STEP_ORDER: TryOnStep[] = ["preparing_images", "connecting", "in_queue", "processing", "success"];
+
+function StatusCard({ step, server, startedAt }: { step: TryOnStep; server: string | null; startedAt: number }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const secs = Math.max(0, Math.floor((now - startedAt) / 1000));
+  const idx = Math.max(0, STEP_ORDER.indexOf(step === "switching_server" ? "connecting" : step));
+  const pct = Math.round(((idx + 1) / STEP_ORDER.length) * 100);
+  return (
+    <div role="status" aria-live="polite" className="mt-5 rounded-[20px] border border-brand-pink/20 bg-brand-pink-soft/50 p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex items-center gap-2 text-[15px] font-bold text-brand-navy">
+          <Loader2 className="size-4 animate-spin text-brand-pink" /> {STATUS_TEXT[step] || "Starting..."}
+        </p>
+        <span className="font-mono text-[13px] text-muted-foreground">
+          {String(Math.floor(secs / 60)).padStart(2, "0")}:{String(secs % 60).padStart(2, "0")}
+        </span>
+      </div>
+      {server && <p className="mt-1 text-[12px] text-muted-foreground">{server}</p>}
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-card">
+        <div className="brand-gradient h-full rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+      <p className="mt-2 text-[12px] text-muted-foreground">Free servers can take up to a minute. Your credit is only used if it works.</p>
+    </div>
+  );
+}
 import demoPerson from "@/assets/demo-person.jpg";
 import demoOutfit from "@/assets/demo-outfit.jpg";
 import demoResult from "@/assets/demo-result.jpg";
