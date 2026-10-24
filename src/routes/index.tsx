@@ -87,19 +87,23 @@ function Hero() {
     <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="float-blob pointer-events-none absolute -left-32 top-10 size-[420px] rounded-full bg-brand-lavender-soft blur-3xl"
+        className="float-blob pointer-events-none absolute -left-32 top-10 size-[420px] rounded-full bg-brand-pink/10 blur-3xl"
       />
       <div
         aria-hidden
         className="float-blob pointer-events-none absolute -right-32 top-40 size-[420px] rounded-full bg-brand-peach/60 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="float-blob pointer-events-none absolute -left-24 -bottom-24 size-[300px] rounded-full bg-brand-peach/40 blur-3xl"
       />
       <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-8 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="fade-up text-center lg:text-left">
           <h1 className="text-[clamp(2.4rem,6vw,4rem)] font-extrabold leading-[1.05] tracking-tight text-brand-navy">
             See Any Outfit
             <br />
-            <span className="text-gradient">On Yourself</span>
-            <Sparkles className="ml-2 inline size-8 text-brand-coral" aria-hidden />
+            <span className="text-brand-pink">On Yourself</span>
+            <TitleSparkle className="ml-1 inline size-7 text-brand-coral" aria-hidden />
           </h1>
           <p className="mx-auto mt-5 max-w-md text-base leading-7 text-muted-foreground lg:mx-0">
             Upload your photo and outfit, and see how you look in it instantly.
