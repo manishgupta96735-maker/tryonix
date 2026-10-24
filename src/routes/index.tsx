@@ -4,7 +4,7 @@ import {
   Download, Heart, Loader2, RefreshCw, ShieldCheck, Shirt, Sparkles, Star,
   Upload, UserRound, Wand2, X, Zap,
 } from "lucide-react";
-import { PublicPage } from "@/components/SiteChrome";
+import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
 import { toast } from "sonner";
 import type { TryOnStep } from "@/lib/tryon-engine";
