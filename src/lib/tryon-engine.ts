@@ -23,19 +23,44 @@ type SpaceAdapter = {
   run: (client: any, person: Blob, outfit: Blob) => Promise<unknown>;
 };
 
+/**
+ * Run a Gradio endpoint. If the space rejects an extra parameter (older API
+ * signature), retry once with the base parameters only so the server never
+ * fails just because of an unsupported option.
+ */
+async function predictSafe(
+  client: any,
+  endpoint: string,
+  base: Record<string, unknown>,
+  extras: Record<string, unknown> = {},
+) {
+  if (Object.keys(extras).length === 0) return client.predict(endpoint, base);
+  try {
+    return await client.predict(endpoint, { ...base, ...extras });
+  } catch {
+    return await client.predict(endpoint, base);
+  }
+}
+
 const SPACES: SpaceAdapter[] = [
+  // Priority 1: IDM-VTON preserves graphic prints and chest text logos best.
   {
     id: "yisol/IDM-VTON",
     label: "Primary AI server",
     run: (c, person, outfit) =>
-      c.predict("/tryon", {
+      predictSafe(c, "/tryon", {
         dict: { background: person, layers: [], composite: null },
         garm_img: outfit,
-        garment_des: "clothing item",
+        garment_des:
+          "upper body clothing item with its original graphic prints and text logos clearly visible",
         is_checked: true,
-        is_checked_crop: false,
+        // Auto-crop the garment to remove hanger / outer background.
+        is_checked_crop: true,
         denoise_steps: 20,
         seed: 42,
+      }, {
+        // Stronger guidance keeps small prints and text sharp (2.0–2.5 range).
+        guidance_scale: 2.5,
       }),
   },
   {
@@ -53,6 +78,7 @@ const SPACES: SpaceAdapter[] = [
         cloth_image: outfit,
         cloth_type: "upper",
         num_inference_steps: 20,
+        // Higher cfg keeps garment details and prints.
         guidance_scale: 2.5,
         seed: 42,
         show_type: "result only",
@@ -60,8 +86,9 @@ const SPACES: SpaceAdapter[] = [
   },
 ];
 
-/** Shrink large images so uploads to free servers are fast. Returns a JPEG Blob. */
-export async function prepareImage(dataUrl: string, maxSide = 1024): Promise<Blob> {
+/** Shrink large images so uploads to free servers are fast. Returns a JPEG Blob.
+ * Call with higher maxSide/quality for the outfit so chest prints and text stay sharp. */
+export async function prepareImage(dataUrl: string, maxSide = 1024, quality = 0.8): Promise<Blob> {
   const img = await new Promise<HTMLImageElement>((res, rej) => {
     const i = new Image();
     i.onload = () => res(i);
@@ -72,8 +99,11 @@ export async function prepareImage(dataUrl: string, maxSide = 1024): Promise<Blo
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(img.width * scale);
   canvas.height = Math.round(img.height * scale);
-  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-  return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", 0.8));
+  const ctx = canvas.getContext("2d")!;
+  ctx.imageSmoothingQuality = "high";
+  // Draw the full image — never center-crop, so chest prints are never cut off.
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return new Promise((res, rej) => canvas.toBlob((b) => (b ? res(b) : rej(new Error("encode"))), "image/jpeg", quality));
 }
 
 function extractUrl(data: unknown): string | null {
@@ -134,7 +164,8 @@ export class AllServersBusyError extends Error {
 /** Runs the free public pool in order; throws AllServersBusyError when every server fails. No paid APIs. */
 export async function runTryOn(personUrl: string, outfitUrl: string, onUpdate: (u: EngineUpdate) => void): Promise<string> {
   onUpdate({ step: "preparing_images" });
-  const [person, outfit] = await Promise.all([prepareImage(personUrl), prepareImage(outfitUrl)]);
+  // Outfit keeps a higher resolution and JPEG quality so prints and text logos survive compression.
+  const [person, outfit] = await Promise.all([prepareImage(personUrl), prepareImage(outfitUrl, 1280, 0.92)]);
 
   for (let i = 0; i < SPACES.length; i++) {
     if (i > 0) onUpdate({ step: "switching_server", server: SPACES[i].label });
