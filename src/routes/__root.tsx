@@ -88,6 +88,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "TryOnix – See Clothes on Yourself Instantly" },
       { property: "og:description", content: "Upload your photo and virtually try outfits instantly using AI." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://aitryonix.vercel.app/" }, // <--- YE LINE ADD KARNI HAI
+
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "TryOnix – See Clothes on Yourself Instantly" },
       { name: "twitter:description", content: "Upload your photo and virtually try outfits instantly using AI." },
@@ -97,6 +99,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "TryOnix" },
     ],
     links: [
+      { rel: "canonical", href: "https://aitryonix.vercel.app/" }, // <--- YE LINE ADD KARNI HAI
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: mascotAsset.url },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          name: "TryOnix",
+          url: "https://aitryonix.vercel.app/",
+          description: "Upload your photo and virtually try outfits instantly using AI.",
+          applicationCategory: "LifestyleApplication",
+          operatingSystem: "All",
+        }),
+      },
+    ],
+
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
