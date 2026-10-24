@@ -24,7 +24,6 @@ import { Route as ResultRouteImport } from './routes/result'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as ApiTryonRouteImport } from './routes/api/tryon'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,11 +99,6 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const ApiTryonRoute = ApiTryonRouteImport.update({
-  id: '/api/tryon',
-  path: '/api/tryon',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,7 +115,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,7 +131,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,7 +149,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/api/tryon': typeof ApiTryonRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,7 +167,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/history'
     | '/settings'
-    | '/api/tryon'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -193,7 +183,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/history'
     | '/settings'
-    | '/api/tryon'
   id:
     | '__root__'
     | '/'
@@ -211,7 +200,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/history'
     | '/_authenticated/settings'
-    | '/api/tryon'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,7 +216,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResultRoute: typeof ResultRoute
   TermsRoute: typeof TermsRoute
-  ApiTryonRoute: typeof ApiTryonRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -338,13 +325,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/tryon': {
-      id: '/api/tryon'
-      path: '/api/tryon'
-      fullPath: '/api/tryon'
-      preLoaderRoute: typeof ApiTryonRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -375,7 +355,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResultRoute: ResultRoute,
   TermsRoute: TermsRoute,
-  ApiTryonRoute: ApiTryonRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

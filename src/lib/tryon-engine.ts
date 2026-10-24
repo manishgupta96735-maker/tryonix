@@ -127,27 +127,11 @@ async function runSpace(space: SpaceAdapter, person: Blob, outfit: Blob, onUpdat
   return urlToDataUrl(url);
 }
 
-/** Final fallback: the app's own AI service. */
-async function runHostedFallback(personUrl: string, outfitUrl: string, onUpdate: (u: EngineUpdate) => void) {
-  onUpdate({ step: "processing", server: "TryOnix AI server" });
-  const res = await withTimeout(
-    fetch("/api/tryon", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ personImage: personUrl, clothImage: outfitUrl }),
-    }),
-    90_000,
-  );
-  const data = await res.json();
-  if (!res.ok || !data.image) throw new Error(data.error || "failed");
-  return data.image as string;
-}
-
 export class AllServersBusyError extends Error {
   constructor() { super("All free AI servers are currently full."); }
 }
 
-/** Runs pool in order; throws AllServersBusyError when every server fails. */
+/** Runs the free public pool in order; throws AllServersBusyError when every server fails. No paid APIs. */
 export async function runTryOn(personUrl: string, outfitUrl: string, onUpdate: (u: EngineUpdate) => void): Promise<string> {
   onUpdate({ step: "preparing_images" });
   const [person, outfit] = await Promise.all([prepareImage(personUrl), prepareImage(outfitUrl)]);
@@ -160,13 +144,7 @@ export async function runTryOn(personUrl: string, outfitUrl: string, onUpdate: (
       console.warn(`[tryon] ${SPACES[i].id} failed:`, e);
     }
   }
-  onUpdate({ step: "switching_server", server: "TryOnix AI server" });
-  try {
-    return await runHostedFallback(personUrl, outfitUrl, onUpdate);
-  } catch (e) {
-    console.warn("[tryon] hosted fallback failed:", e);
-    throw new AllServersBusyError();
-  }
+  throw new AllServersBusyError();
 }
 
 export const STEP_MESSAGES: Record<TryOnStep, string> = {
