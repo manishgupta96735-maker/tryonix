@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://aitryonix.vercel.app/sitemap.xml
