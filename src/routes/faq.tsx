@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronDown, Sparkles } from "lucide-react";
+import {
+  ChevronDown, Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle,
+} from "lucide-react";
 import { PublicPage } from "@/components/SiteChrome";
+
+const ICONS = [Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle];
 
 export const Route = createFileRoute("/faq")({
   ssr: false,
@@ -64,8 +68,7 @@ function FaqPage() {
       <section className="mx-auto max-w-3xl px-5 pb-16 pt-12 sm:px-6 sm:pt-16">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-brand-navy sm:text-5xl">
-            Frequently Asked <span className="text-gradient">Questions</span>
-            <Sparkles className="ml-2 inline size-7 text-brand-coral" aria-hidden />
+            Frequently Asked Questions
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-muted-foreground">
             Everything you need to know about TryOnix.
@@ -73,15 +76,18 @@ function FaqPage() {
         </div>
 
         <div className="mt-10 space-y-3">
-          {FAQS.map((faq) => (
+          {FAQS.map((faq, i) => {
+            const Icon = ICONS[i % ICONS.length];
+            return (
             <details key={faq.q} className="group rounded-[18px] border border-border bg-card px-5 shadow-[var(--shadow-soft)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-bold text-brand-navy">
-                {faq.q}
+                <span className="flex items-center gap-3"><Icon className="size-4 shrink-0 text-brand-navy" aria-hidden />{faq.q}</span>
                 <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
               </summary>
               <p className="pb-5 pr-8 text-sm leading-6 text-muted-foreground">{faq.a}</p>
             </details>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-12 rounded-[26px] border border-border bg-card p-8 text-center shadow-[var(--shadow-soft)]">
