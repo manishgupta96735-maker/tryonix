@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronDown, Sparkles } from "lucide-react";
+import {
+  ChevronDown, Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle,
+} from "lucide-react";
 import { PublicPage } from "@/components/SiteChrome";
+
+const ICONS = [Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle];
 
 export const Route = createFileRoute("/faq")({
   ssr: false,
@@ -82,7 +86,8 @@ function FaqPage() {
               </summary>
               <p className="pb-5 pr-8 text-sm leading-6 text-muted-foreground">{faq.a}</p>
             </details>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-12 rounded-[26px] border border-border bg-card p-8 text-center shadow-[var(--shadow-soft)]">
