@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Download, Loader2, Share2, Shirt, Sparkles, UserRound, Zap } from "lucide-react";
 import { PublicPage, useGuestCredits } from "@/components/SiteChrome";
+import { BannerAd } from "@/components/Ads";
 import mascotAsset from "@/assets/mascot.png.asset.json";
 import { readTryOnRecord, saveTryOnDraft, type TryOnRecord } from "@/lib/tryon-storage";
 
@@ -155,6 +156,7 @@ function ResultPage() {
           </div>
         )}
       </section>
+      {status === "ready" && <BannerAd variant="result" />}
     </PublicPage>
   );
 }
