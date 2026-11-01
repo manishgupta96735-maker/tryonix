@@ -124,9 +124,11 @@ function HeroCollage() {
       <span aria-hidden className="absolute -left-2 top-0 text-2xl text-brand-coral">✦</span>
       <span aria-hidden className="absolute -right-1 top-10 text-xl text-brand-lavender">✦</span>
       <span aria-hidden className="absolute bottom-6 left-4 text-xl text-brand-pink">♡</span>
-      <div className="flex items-end justify-center gap-3 sm:gap-5">
+      <div className="flex items-end justify-center gap-2 sm:gap-3">
         <Polaroid img={demoPerson} alt="Example person photo" caption="Your Photo" className="-rotate-6 w-28 sm:w-36" />
+        <span aria-hidden className="self-center text-lg font-bold text-brand-pink">→</span>
         <Polaroid img={demoOutfit} alt="Example outfit photo" caption="Outfit" className="w-28 rotate-3 sm:w-36" />
+        <span aria-hidden className="self-center text-lg font-bold text-brand-pink">→</span>
         <Polaroid img={demoResult} alt="Example AI try-on result" caption="AI Try-On" badge className="w-32 rotate-2 sm:w-44" />
       </div>
     </div>
@@ -141,7 +143,7 @@ function Polaroid({
       <img src={img} alt={alt} className="aspect-[3/4] w-full rounded-xl object-cover" loading="eager" />
       <figcaption className="pb-1 pt-1.5 text-center text-[11px] font-bold text-brand-navy sm:text-xs">{caption}</figcaption>
       {badge && (
-        <span className="brand-gradient absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
+        <span className="brand-gradient absolute -bottom-2.5 left-2 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
           ✦ AI Try-On
         </span>
       )}
@@ -415,7 +417,7 @@ function Benefits() {
   ];
   return (
     <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:divide-x lg:divide-border [&>div]:border-0 [&>div]:bg-transparent [&>div]:shadow-none">
         {items.map((b) => (
           <div key={b.title} className="flex items-center gap-3.5 rounded-[20px] border border-border bg-card p-4 shadow-[var(--shadow-soft)]">
             <span className="grid size-11 shrink-0 place-items-center rounded-full bg-brand-pink-soft">
