@@ -360,7 +360,7 @@ function PickCard({
     r.readAsDataURL(file);
   };
   return (
-    <div className="rounded-[22px] border-2 border-dashed border-brand-pink/25 bg-brand-pink-soft/40 p-4 sm:p-5">
+    <div className="rounded-[18px] border-2 border-dashed border-border bg-secondary/40 p-4 sm:p-5">
       {value ? (
         <div>
           <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
