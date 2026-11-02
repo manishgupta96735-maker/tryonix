@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ChevronDown, Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle,
 } from "lucide-react";
-import { PublicPage } from "@/components/SiteChrome";
+import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
 
 const ICONS = [Upload, Shirt, UserRound, Tag, LayoutGrid, Share, Smartphone, HelpCircle];
 
