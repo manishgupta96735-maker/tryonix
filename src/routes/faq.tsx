@@ -65,7 +65,17 @@ const FAQS = [
 function FaqPage() {
   return (
     <PublicPage>
-      <section className="mx-auto max-w-3xl px-5 pb-16 pt-12 sm:px-6 sm:pt-16">
+      <div className="relative overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute -left-20 top-40 size-56 rounded-full bg-brand-lavender/25 blur-2xl" />
+          <div className="absolute -bottom-16 -left-16 size-64 rounded-full bg-brand-peach/60 blur-2xl" />
+          <div className="absolute -right-20 bottom-0 size-72 rounded-full bg-brand-pink/15 blur-2xl" />
+          <span className="absolute left-[8%] top-20 text-6xl font-light text-brand-lavender">?</span>
+          <span className="absolute right-[8%] top-28 text-5xl text-brand-pink">♡</span>
+          <TitleSparkle className="absolute left-[6%] bottom-40 size-8 text-brand-pink" />
+          <TitleSparkle className="absolute right-[18%] top-16 size-5 text-brand-peach" />
+        </div>
+      <section className="relative mx-auto max-w-3xl px-5 pb-16 pt-12 sm:px-6 sm:pt-16">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-brand-navy sm:text-5xl">
             Frequently Asked Questions
@@ -79,31 +89,18 @@ function FaqPage() {
           {FAQS.map((faq, i) => {
             const Icon = ICONS[i % ICONS.length];
             return (
-            <details key={faq.q} className="group rounded-[18px] border border-border bg-card px-5 shadow-[var(--shadow-soft)]">
+            <details key={faq.q} className="group rounded-[14px] bg-card px-5 shadow-[var(--shadow-soft)]">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-[15px] font-bold text-brand-navy">
                 <span className="flex items-center gap-3"><Icon className="size-4 shrink-0 text-brand-navy" aria-hidden />{faq.q}</span>
-                <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" aria-hidden />
+                <ChevronDown className="size-4 shrink-0 text-brand-navy transition-transform group-open:rotate-180" aria-hidden />
               </summary>
               <p className="pb-5 pr-8 text-sm leading-6 text-muted-foreground">{faq.a}</p>
             </details>
             );
           })}
         </div>
-
-        <div className="mt-12 rounded-[26px] border border-border bg-card p-8 text-center shadow-[var(--shadow-soft)]">
-          <h2 className="text-2xl font-extrabold text-brand-navy">Ready to Try a New Look?</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-            Upload your photo and outfit, and see the result in seconds.
-          </p>
-          <Link
-            to="/"
-            hash="upload"
-            className="brand-gradient mt-6 inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-bold text-white shadow-lg shadow-brand-pink/25 transition-transform hover:-translate-y-0.5"
-          >
-            Try It Now <span aria-hidden>→</span>
-          </Link>
-        </div>
       </section>
+      </div>
     </PublicPage>
   );
 }
