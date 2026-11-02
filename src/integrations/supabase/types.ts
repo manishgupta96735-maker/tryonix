@@ -41,6 +41,56 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          owner_secret: string
+          pending: number
+          total: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          owner_secret: string
+          pending?: number
+          total?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          owner_secret?: string
+          pending?: number
+          total?: number
+        }
+        Relationships: []
+      }
+      referral_visits: {
+        Row: {
+          code: string
+          created_at: string
+          visitor_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          visitor_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_visits_code_fkey"
+            columns: ["code"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       tryon_history: {
         Row: {
           cloth_url: string | null
@@ -97,7 +147,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      referral_claim: { Args: { _secret: string }; Returns: Json }
+      referral_register: { Args: { _secret: string }; Returns: string }
+      referral_visit: {
+        Args: { _code: string; _visitor: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

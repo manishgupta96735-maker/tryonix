@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
 import { EXTRA_TRIES, grantExtraCredits } from "@/components/Ads";
+import { ShareCard } from "@/components/ShareCard";
+import { claimReferralRewards, recordReferralVisit } from "@/lib/referral";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
 import { toast } from "sonner";
 import type { TryOnStep } from "@/lib/tryon-engine";
@@ -199,6 +201,16 @@ function UploadSection() {
     saveTryOnDraft({ person: person ?? "", outfit: outfit ?? "" }).catch(() => {});
   }, [person, outfit]);
 
+  useEffect(() => {
+    const claim = () => claimReferralRewards().then((n) => {
+      if (n > 0) { setCredits((c) => c + n); toast.success(`🎉 A friend opened your link! +${n} try-ons added`); }
+    }).catch(() => {});
+    recordReferralVisit().catch(() => {}).finally(claim);
+    const onFocus = () => { if (document.visibilityState === "visible") claim(); };
+    document.addEventListener("visibilitychange", onFocus);
+    return () => document.removeEventListener("visibilitychange", onFocus);
+  }, []);
+
   const outOfCredits = credits <= 0;
 
   const generate = async () => {
@@ -283,6 +295,7 @@ function UploadSection() {
             <button type="button" onClick={() => { setCredits(grantExtraCredits()); toast.success(`${EXTRA_TRIES} extra try-ons added!`); }} className="brand-gradient mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md">
               + Get {EXTRA_TRIES} Extra Try-Ons
             </button>
+            <ShareCard />
           </div>
         )}
 
