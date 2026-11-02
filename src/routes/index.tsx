@@ -5,7 +5,7 @@ import {
   Upload, UserRound, Wand2, X, Zap,
 } from "lucide-react";
 import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
-import { BannerAd, RewardedAdModal, RewardAddedNotice } from "@/components/Ads";
+import { EXTRA_TRIES, grantExtraCredits } from "@/components/Ads";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
 import { toast } from "sonner";
 import type { TryOnStep } from "@/lib/tryon-engine";
@@ -78,7 +78,6 @@ function LandingPage() {
       <Hero />
       <UploadSection />
       <Benefits />
-      <BannerAd variant="home" />
     </PublicPage>
   );
 }
@@ -201,13 +200,6 @@ function UploadSection() {
   }, [person, outfit]);
 
   const outOfCredits = credits <= 0;
-  const [adOpen, setAdOpen] = useState(false);
-  const [rewarded, setRewarded] = useState(false);
-  const autoOffered = useRef(false);
-  useEffect(() => {
-    // Offer the rewarded ad once when free tries run out.
-    if (outOfCredits && !autoOffered.current) { autoOffered.current = true; setAdOpen(true); }
-  }, [outOfCredits]);
 
   const generate = async () => {
     if (!person || !outfit || loading || outOfCredits) return;
@@ -284,22 +276,15 @@ function UploadSection() {
 
         {outOfCredits && (
           <div className="mt-5 rounded-[20px] border border-border bg-secondary/60 p-5 text-center">
-            <p className="text-[15px] font-bold text-brand-navy">Your {FREE_TRIES} free try-ons are used</p>
+            <p className="text-[15px] font-bold text-brand-navy">Your free try-ons are used</p>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Watch a short ad to get 1 extra try-on for free.
+              Get {EXTRA_TRIES} more try-ons for free.
             </p>
-            <button type="button" onClick={() => setAdOpen(true)} className="brand-gradient mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md">
-              ▶ Watch Ad for +1 Try-On
+            <button type="button" onClick={() => { setCredits(grantExtraCredits()); toast.success(`${EXTRA_TRIES} extra try-ons added!`); }} className="brand-gradient mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md">
+              + Get {EXTRA_TRIES} Extra Try-Ons
             </button>
           </div>
         )}
-
-        {rewarded && <RewardAddedNotice onClose={() => setRewarded(false)} />}
-        <RewardedAdModal
-          open={adOpen}
-          onClose={() => setAdOpen(false)}
-          onRewarded={(n) => { setCredits(n); setRewarded(true); }}
-        />
 
         {loading && <StatusCard step={step} server={server} startedAt={startedAt} />}
 
