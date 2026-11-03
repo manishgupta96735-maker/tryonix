@@ -148,6 +148,7 @@ export type Database = {
     }
     Functions: {
       referral_claim: { Args: { _secret: string }; Returns: Json }
+      referral_history: { Args: { _secret: string }; Returns: Json }
       referral_register: { Args: { _secret: string }; Returns: string }
       referral_visit: {
         Args: { _code: string; _visitor: string }
