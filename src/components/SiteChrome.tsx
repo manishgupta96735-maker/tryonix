@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { readDailyCredits } from "@/components/Ads";
 import { Link } from "@tanstack/react-router";
 import { Menu, Shirt, Sparkles, X, Zap } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
@@ -30,14 +31,8 @@ export function useGuestCredits() {
 }
 
 function readCredits() {
-  try {
-    const raw = window.localStorage.getItem(guestKey);
-    if (raw === null) return 3;
-    const n = Number(raw);
-    return Number.isFinite(n) ? Math.max(0, n) : 3;
-  } catch {
-    return 3;
-  }
+  void guestKey;
+  return readDailyCredits();
 }
 
 export function SiteHeader() {
