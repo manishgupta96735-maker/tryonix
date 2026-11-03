@@ -11,6 +11,7 @@ const navigation = [
   { label: "How it works", to: "/how-it-works" as const },
   { label: "Examples", to: "/examples" as const },
   { label: "FAQ", to: "/faq" as const },
+  { label: "Credits", to: "/credits" as const },
 ];
 
 export function useGuestCredits() {
@@ -101,6 +102,7 @@ export function SiteFooter() {
           <Link to="/how-it-works" className="hover:text-brand-pink">How it works</Link>
           <Link to="/examples" className="hover:text-brand-pink">Examples</Link>
           <Link to="/faq" className="hover:text-brand-pink">FAQ</Link>
+          <Link to="/credits" className="hover:text-brand-pink">Credits</Link>
         </nav>
         <nav aria-label="Legal links" className="flex gap-5 text-sm font-medium text-muted-foreground">
           <Link to="/privacy" className="hover:text-brand-pink">Privacy</Link>
