@@ -5,7 +5,7 @@ import {
   Upload, UserRound, Wand2, X, Zap,
 } from "lucide-react";
 import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
-import { EXTRA_TRIES, grantExtraCredits } from "@/components/Ads";
+import { DAILY_FREE, readDailyCredits } from "@/components/Ads";
 import { ShareCard } from "@/components/ShareCard";
 import { claimReferralRewards, recordReferralVisit } from "@/lib/referral";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
@@ -158,13 +158,7 @@ const FREE_TRIES = 3;
 
 function readGuestCredits() {
   if (typeof window === "undefined") return FREE_TRIES;
-  const v = window.localStorage.getItem(GUEST_KEY);
-  if (v === null) {
-    window.localStorage.setItem(GUEST_KEY, String(FREE_TRIES));
-    return FREE_TRIES;
-  }
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.max(0, n) : FREE_TRIES;
+  return readDailyCredits();
 }
 
 function UploadSection() {
@@ -288,13 +282,10 @@ function UploadSection() {
 
         {outOfCredits && (
           <div className="mt-5 rounded-[20px] border border-border bg-secondary/60 p-5 text-center">
-            <p className="text-[15px] font-bold text-brand-navy">Your free try-ons are used</p>
+            <p className="text-[15px] font-bold text-brand-navy">Today's free try-ons are used</p>
             <p className="mt-1.5 text-sm text-muted-foreground">
-              Get {EXTRA_TRIES} more try-ons for free.
+              You'll automatically get {DAILY_FREE} new try-ons tomorrow. Share TryOnix to get more now.
             </p>
-            <button type="button" onClick={() => { setCredits(grantExtraCredits()); toast.success(`${EXTRA_TRIES} extra try-ons added!`); }} className="brand-gradient mt-3 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-md">
-              + Get {EXTRA_TRIES} Extra Try-Ons
-            </button>
             <ShareCard />
           </div>
         )}

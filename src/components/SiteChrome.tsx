@@ -30,14 +30,8 @@ export function useGuestCredits() {
 }
 
 function readCredits() {
-  try {
-    const raw = window.localStorage.getItem(guestKey);
-    if (raw === null) return 3;
-    const n = Number(raw);
-    return Number.isFinite(n) ? Math.max(0, n) : 3;
-  } catch {
-    return 3;
-  }
+  void guestKey;
+  return readDailyCredits();
 }
 
 export function SiteHeader() {
