@@ -8,6 +8,13 @@
       "when": 1793622736397,
       "tag": "0000_guest_referrals",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793675216184,
+      "tag": "0001_referral_history",
+      "breakpoints": true
     }
   ]
 }

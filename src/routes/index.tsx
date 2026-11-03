@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Download, Heart, Loader2, RefreshCw, ShieldCheck, Shirt, Sparkles, Star,
@@ -8,6 +8,7 @@ import { PublicPage, TitleSparkle } from "@/components/SiteChrome";
 import { DAILY_FREE, readDailyCredits } from "@/components/Ads";
 import { ShareCard } from "@/components/ShareCard";
 import { claimReferralRewards, recordReferralVisit } from "@/lib/referral";
+import { logCreditEvent } from "@/lib/credit-ledger";
 import { readTryOnDraft, saveTryOnDraft, saveTryOnRecord } from "@/lib/tryon-storage";
 import { toast } from "sonner";
 import type { TryOnStep } from "@/lib/tryon-engine";
@@ -223,6 +224,7 @@ function UploadSection() {
       const current = readGuestCredits();
       const next = Math.max(0, current - 1);
       window.localStorage.setItem(GUEST_KEY, String(next));
+      logCreditEvent("tryon", -1, "Try-on generated");
       window.dispatchEvent(new Event("tryonix-credits-change"));
       setCredits(next);
       setStep("success");
@@ -287,6 +289,9 @@ function UploadSection() {
               You'll automatically get {DAILY_FREE} new try-ons tomorrow. Share TryOnix to get more now.
             </p>
             <ShareCard />
+            <Link to="/credits" className="mt-3 inline-block text-[13px] font-bold text-brand-pink hover:underline">
+              View your credit history →
+            </Link>
           </div>
         )}
 

@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as ExamplesRouteImport } from './routes/examples'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as FaviconDoticoRouteImport } from './routes/favicon[.]ico'
@@ -52,6 +53,11 @@ const AuthRoute = AuthRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExamplesRoute = ExamplesRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/credits': typeof CreditsRoute
   '/examples': typeof ExamplesRoute
   '/faq': typeof FaqRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/credits': typeof CreditsRoute
   '/examples': typeof ExamplesRoute
   '/faq': typeof FaqRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/credits': typeof CreditsRoute
   '/examples': typeof ExamplesRoute
   '/faq': typeof FaqRoute
   '/favicon.ico': typeof FaviconDoticoRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/credits'
     | '/examples'
     | '/faq'
     | '/favicon.ico'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/credits'
     | '/examples'
     | '/faq'
     | '/favicon.ico'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/credits'
     | '/examples'
     | '/faq'
     | '/favicon.ico'
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  CreditsRoute: typeof CreditsRoute
   ExamplesRoute: typeof ExamplesRoute
   FaqRoute: typeof FaqRoute
   FaviconDoticoRoute: typeof FaviconDoticoRoute
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/examples': {
@@ -348,6 +368,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  CreditsRoute: CreditsRoute,
   ExamplesRoute: ExamplesRoute,
   FaqRoute: FaqRoute,
   FaviconDoticoRoute: FaviconDoticoRoute,

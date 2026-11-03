@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { grantExtraCredits } from "@/components/Ads";
+import { logCreditEvent } from "@/lib/credit-ledger";
 
 export const REFERRAL_REWARD = 2;
 const SECRET_KEY = "tryonix_device_id_v1";
@@ -7,7 +8,8 @@ const CODE_KEY = "tryonix_ref_code_v1";
 const VISITED_KEY = "tryonix_ref_visited_v1";
 const SITE = "https://aitryonix.vercel.app";
 
-function deviceId(): string {
+/** The anonymous device secret that owns this device's referral link. */
+export function deviceId(): string {
   let id = localStorage.getItem(SECRET_KEY);
   if (!id) { id = crypto.randomUUID(); localStorage.setItem(SECRET_KEY, id); }
   return id;
@@ -33,6 +35,7 @@ export async function recordReferralVisit() {
   window.history.replaceState(null, "", url.pathname + url.search + url.hash);
   if (localStorage.getItem(VISITED_KEY) === code || localStorage.getItem(CODE_KEY) === code) return;
   localStorage.setItem(VISITED_KEY, code);
+  logCreditEvent("visit", 0, "Opened a friend's TryOnix link");
   await supabase.rpc("referral_visit", { _code: code.slice(0, 20), _visitor: deviceId() });
 }
 
@@ -41,6 +44,6 @@ export async function claimReferralRewards(): Promise<number> {
   if (!localStorage.getItem(CODE_KEY)) return 0;
   const { data } = await supabase.rpc("referral_claim", { _secret: deviceId() });
   const credits = Number((data as { credits?: number } | null)?.credits ?? 0);
-  if (credits > 0) grantExtraCredits(credits);
+  if (credits > 0) grantExtraCredits(credits, "Friends joined through your link");
   return credits;
 }
