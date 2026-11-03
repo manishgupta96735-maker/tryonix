@@ -223,6 +223,7 @@ function UploadSection() {
       const current = readGuestCredits();
       const next = Math.max(0, current - 1);
       window.localStorage.setItem(GUEST_KEY, String(next));
+      logCreditEvent("tryon", -1, "Try-on generated");
       window.dispatchEvent(new Event("tryonix-credits-change"));
       setCredits(next);
       setStep("success");
