@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { readDailyCredits } from "@/components/Ads";
 import { Link } from "@tanstack/react-router";
 import { Menu, Shirt, Sparkles, X, Zap } from "lucide-react";
 import mascotAsset from "@/assets/mascot.png.asset.json";
