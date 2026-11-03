@@ -53,10 +53,15 @@ function CreditsPage() {
   useEffect(() => {
     setBalance(readDailyCredits());
     setEntries(readLedger());
-    supabase
-      .rpc("referral_history", { _secret: deviceId() })
-      .then(({ data }) => setRefStats((data as ReferralStats | null) ?? null))
-      .catch(() => setRefStats(null));
+    const loadRef = async () => {
+      try {
+        const { data } = await supabase.rpc("referral_history", { _secret: deviceId() });
+        setRefStats((data as ReferralStats | null) ?? null);
+      } catch {
+        setRefStats(null);
+      }
+    };
+    void loadRef();
   }, []);
 
   const used = (entries ?? []).filter((e) => e.k === "tryon").reduce((s, e) => s + Math.abs(e.a), 0);
