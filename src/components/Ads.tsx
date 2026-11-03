@@ -23,3 +23,11 @@ export function readDailyCredits(): number {
     return DAILY_FREE;
   }
 }
+
+/** Adds bonus try-ons (used by referrals). Returns the new count. */
+export function grantExtraCredits(amount: number): number {
+  const next = readDailyCredits() + amount;
+  try { window.localStorage.setItem(GUEST_KEY, String(next)); } catch { /* ignore */ }
+  window.dispatchEvent(new Event("tryonix-credits-change"));
+  return next;
+}
